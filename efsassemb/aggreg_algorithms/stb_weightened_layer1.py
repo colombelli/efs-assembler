@@ -33,6 +33,15 @@ def aggregate(self, selector:Hybrid):
     return final_rankings
 
 
+def get_normalize_stability(stability):
+
+    s_max = 1
+    s_min = -1
+    normalized = (stability - s_min) / (s_max - s_min) 
+
+    return normalized*2
+
+
 
 def initialize_aggregated_ranking_dict(bs_rankings):
     aggregated_ranking = {}
@@ -54,7 +63,8 @@ def get_fs_stabilities(threshold, bs_rankings):
             lst_genes = list(df_ranking.index.values)
             fs_rankings.append(lst_genes)
         
-        stabilities.append(ki.get_kuncheva_index(fs_rankings, threshold=threshold))  
+        normalized_stb = get_normalize_stability(ki.get_kuncheva_index(fs_rankings, threshold=threshold))
+        stabilities.append(normalized_stb)  
     return stabilities
 
 
