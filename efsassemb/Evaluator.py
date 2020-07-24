@@ -2,6 +2,7 @@ import pandas as pd
 import pickle
 import glob
 from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import metrics
 import numpy as np
 import efsassemb.kuncheva_index as ki
@@ -92,6 +93,7 @@ class Evaluator:
 
     def __reset_classifier(self):
         self.classifier = SVC(gamma='auto', probability=True)
+        #self.classifier = GradientBoostingClassifier()
         return
     
     def __reset_confusion_matrices(self):
@@ -122,12 +124,14 @@ class Evaluator:
         self.__reset_classifier()
         self.classifier.fit(self.training_x, self.training_y)
 
-        accuracy = self.classifier.score(self.testing_x, self.testing_y)
+        #accuracy = self.classifier.score(self.testing_x, self.testing_y)
 
         pred = self.classifier.predict_proba(self.testing_x)
+        y_pred = np.argmax(pred, axis=1)
         pred = self.__get_probs_positive_class(pred)
 
         roc_auc = metrics.roc_auc_score(np.array(self.testing_y, dtype=int), pred)
+        accuracy = metrics.accuracy_score(self.testing_y, y_pred)
 
         precision, recall, _ = metrics.precision_recall_curve(np.array(self.testing_y, dtype=int), pred)
         pr_auc = metrics.auc(recall, precision)
