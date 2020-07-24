@@ -1,4 +1,4 @@
-from engine.DataManager import DataManager as dm
+from efsassemb.DataManager import DataManager as dm
 import rpy2.robjects as robjects
 import importlib
 import os

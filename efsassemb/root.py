@@ -1,13 +1,12 @@
-from engine.DataManager import DataManager
-from engine.Hybrid import Hybrid
-from engine.Heterogeneous import Heterogeneous
-from engine.Homogeneous import Homogeneous
-from engine.SingleFS import SingleFS
-from engine.Evaluator import Evaluator
-from engine.InformationManager import InformationManager
+from efsassemb.DataManager import DataManager
+from efsassemb.Hybrid import Hybrid
+from efsassemb.Heterogeneous import Heterogeneous
+from efsassemb.Homogeneous import Homogeneous
+from efsassemb.SingleFS import SingleFS
+from efsassemb.Evaluator import Evaluator
+from efsassemb.InformationManager import InformationManager
 import rpy2.robjects.packages as rpackages
 from time import time
-
 
 def compute_print_time(st):
     

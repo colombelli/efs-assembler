@@ -4,9 +4,9 @@ import glob
 from sklearn.svm import SVC
 from sklearn import metrics
 import numpy as np
-import engine.kuncheva_index as ki
-from engine.DataManager import DataManager
-from engine.Constants import *
+import efsassemb.kuncheva_index as ki
+from efsassemb.DataManager import DataManager
+from efsassemb.Constants import *
 
 class Evaluator:
 

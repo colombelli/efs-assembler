@@ -3,7 +3,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import metrics
 import numpy as np
-import engine.kuncheva_index as ki
+import efsassemb.kuncheva_index as ki
 
 class Evaluate:
 

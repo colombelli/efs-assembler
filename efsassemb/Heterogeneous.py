@@ -1,7 +1,7 @@
-from engine.Selector import FSelector, PySelector, RSelector
-from engine.Aggregator import Aggregator
-from engine.DataManager import DataManager
-from engine.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassemb.Selector import FSelector, PySelector, RSelector
+from efsassemb.Aggregator import Aggregator
+from efsassemb.DataManager import DataManager
+from efsassemb.Constants import AGGREGATED_RANKING_FILE_NAME
 
 class Heterogeneous:
     
