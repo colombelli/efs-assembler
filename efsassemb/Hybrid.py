@@ -59,7 +59,7 @@ class Hybrid:
                 snd_layer_rankings[th] = []
 
             for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-                print("\n\nBootstrap: ", j+1, "\n")
+                print("\n\nBootstrap: ", j+1, "| Fold iteration:", i+1, "\n")
                 output_path = self.dm.get_output_path(i, j)
                 bootstrap_data = self.dm.pd_df.loc[bootstrap]
 
@@ -122,7 +122,7 @@ class Hybrid:
 
             bs_rankings = {}
             for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-                print("\n\nBootstrap: ", j+1, "\n")
+                print("\n\nBootstrap: ", j+1, "| Fold iteration:", i+1, "\n")
                 output_path = self.dm.get_output_path(i, j)
                 bootstrap_data = self.dm.pd_df.loc[bootstrap]
 
