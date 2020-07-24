@@ -6,7 +6,9 @@ from sklearn.utils import resample
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
-from os import mkdir
+import random
+from tensorflow import random as tf_random
+from os import mkdir, environ
 import sys
 import pickle
 import urllib.parse
@@ -19,8 +21,7 @@ class DataManager:
                 num_folds, seed):
         
         self.seed = seed
-        np.random.seed(self.seed)
-        robjects.r['set.seed'](self.seed)
+        self.__set_seed()
 
         self.file_path = file_path
         self.num_bootstraps = num_bootstraps
@@ -40,6 +41,17 @@ class DataManager:
                                     # any of the aggregation methods
 
         self.results_path = results_path
+
+
+    def __set_seed(self):
+        np.random.seed(self.seed)
+        robjects.r['set.seed'](self.seed)
+
+        # from https://stackoverflow.com/questions/50659482/why-cant-i-get-reproducible-results-in-keras-even-though-i-set-the-random-seeds
+        environ['PYTHONHASHSEED']=str(self.seed)
+        random.seed(self.seed)
+        tf_random.set_seed(self.seed)
+        return
 
 
     def __load_dataset(self):
@@ -249,6 +261,8 @@ class DataManager:
         self.seed = np.random.randint(0, high=MAX_SEED)
         with open(self.results_path+"seed.pkl", 'wb') as f:
                 pickle.dump(self.seed, f)
+        self.__set_seed()
+        return
 
 
     def get_output_path(self, fold_iteration=None, bootstrap_iteration=None):
