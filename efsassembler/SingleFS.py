@@ -1,6 +1,6 @@
-from efsassemb.Selector import FSelector, PySelector, RSelector
-from efsassemb.DataManager import DataManager
-from efsassemb.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Selector import FSelector, PySelector, RSelector
+from efsassembler.DataManager import DataManager
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
 
 class SingleFS:
     

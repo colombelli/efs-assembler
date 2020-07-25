@@ -1,5 +1,5 @@
-from efsassemb.StratifiedKFold import StratifiedKFold
-from efsassemb.Constants import *
+from efsassembler.StratifiedKFold import StratifiedKFold
+from efsassembler.Constants import *
 import numpy as np
 import pandas as pd
 from sklearn.utils import resample

@@ -1,8 +1,8 @@
 import pandas as pd
 from copy import deepcopy
 
-import efsassemb.kuncheva_index as ki
-from efsassemb import Hybrid
+import efsassembler.kuncheva_index as ki
+from efsassembler import Hybrid
 
 
 heavy = True    # requires access to dm.bs_rankings

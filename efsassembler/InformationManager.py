@@ -1,6 +1,6 @@
-from efsassemb.DataManager import DataManager
-from efsassemb.Evaluator import Evaluator
-from efsassemb.Constants import *
+from efsassembler.DataManager import DataManager
+from efsassembler.Evaluator import Evaluator
+from efsassembler.Constants import *
 import csv
 from numpy import array as np_array
 from numpy import mean as np_mean

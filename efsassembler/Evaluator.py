@@ -5,9 +5,9 @@ from sklearn.svm import SVC
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import metrics
 import numpy as np
-import efsassemb.kuncheva_index as ki
-from efsassemb.DataManager import DataManager
-from efsassemb.Constants import *
+import efsassembler.kuncheva_index as ki
+from efsassembler.DataManager import DataManager
+from efsassembler.Constants import *
 
 class Evaluator:
 

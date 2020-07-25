@@ -1,10 +1,10 @@
-from efsassemb.DataManager import DataManager
-from efsassemb.Hybrid import Hybrid
-from efsassemb.Heterogeneous import Heterogeneous
-from efsassemb.Homogeneous import Homogeneous
-from efsassemb.SingleFS import SingleFS
-from efsassemb.Evaluator import Evaluator
-from efsassemb.InformationManager import InformationManager
+from efsassembler.DataManager import DataManager
+from efsassembler.Hybrid import Hybrid
+from efsassembler.Heterogeneous import Heterogeneous
+from efsassembler.Homogeneous import Homogeneous
+from efsassembler.SingleFS import SingleFS
+from efsassembler.Evaluator import Evaluator
+from efsassembler.InformationManager import InformationManager
 import rpy2.robjects.packages as rpackages
 from time import time
 

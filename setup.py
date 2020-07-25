@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-  name = 'efsassemb',         
-  packages = ['efsassemb'],  
+  name = 'efsassembler',         
+  packages = ['efsassembler'],  
   version = '0.0.1',
   license='GNU General Public License v3.0',
   description = 'A framework for building Ensemble Feature Selection experiments.',   

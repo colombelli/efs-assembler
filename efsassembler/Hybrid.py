@@ -1,7 +1,7 @@
-from efsassemb.Selector import PySelector, RSelector
-from efsassemb.Aggregator import Aggregator
-from efsassemb.DataManager import DataManager
-from efsassemb.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Selector import PySelector, RSelector
+from efsassembler.Aggregator import Aggregator
+from efsassembler.DataManager import DataManager
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
 
 class Hybrid:
     
