@@ -40,6 +40,11 @@ class Experiments:
 
         <programming language object>
             either "python" or "r"
+
+
+
+        Note: "aggregators", "selectors" and "datasets" properties need to be lists, even if
+                they have only one element. The same goes for experiments object itself. 
     """
 
     def __init__(self, experiments, results_path, thresholds):
