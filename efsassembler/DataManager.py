@@ -1,15 +1,15 @@
-from efsassembler.StratifiedKFold import StratifiedKFold
 from efsassembler.Constants import *
 import numpy as np
 import pandas as pd
 from sklearn.utils import resample
+from sklearn.model_selection import StratifiedKFold
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
 import random
 from tensorflow import random as tf_random
 from os import mkdir, environ
-import sys
+from sys import exit
 import pickle
 import urllib.parse
 from copy import deepcopy
@@ -82,7 +82,7 @@ class DataManager:
             print("Given directory already created, files will be replaced.")
             print("Note that if there's any missing folder inside this existent one, the execution will fail.")
             if input("Input c to cancel or any other key to continue... ") == "c":
-                sys.exit()
+                exit()
             else: 
                 return
         
@@ -210,9 +210,11 @@ class DataManager:
 
     def __calculate_folds(self):
 
-        k = self.num_folds
-        skf = StratifiedKFold(self.seed, self.pd_df, "class", k)
-        self.folds = list(skf.split())
+        skf = StratifiedKFold(n_splits=self.num_folds, shuffle=True, random_state=self.seed)
+        X = self.pd_df.loc[:, self.pd_df.columns != 'class']
+        y = self.pd_df.loc[:, ['class']]
+        skf.get_n_splits(X, y)
+        self.folds = list(skf.split(X, y))
         return
 
     

@@ -253,8 +253,8 @@ class Evaluator:
 
     def __set_data_axes(self, training, testing, genes):
 
-        training_df = self.dm.pd_df.loc[training]
-        testing_df = self.dm.pd_df.loc[testing]
+        training_df = self.dm.pd_df.iloc[training]
+        testing_df = self.dm.pd_df.iloc[testing]
 
         self.training_x = self.__get_x(training_df, genes)
         self.training_y = self.__get_y(training_df)

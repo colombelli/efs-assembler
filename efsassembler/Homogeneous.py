@@ -31,7 +31,7 @@ class Homogeneous:
                 print("\n\nBootstrap: ", j+1, "| Fold iteration:", i+1, "\n")
                 
                 output_path = self.dm.get_output_path(i, j)
-                bootstrap_data = self.dm.pd_df.loc[bootstrap]
+                bootstrap_data = self.dm.pd_df.iloc[bootstrap]
                 rankings.append(self.fs_method.select(bootstrap_data, output_path))
 
                 

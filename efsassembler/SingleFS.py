@@ -23,7 +23,7 @@ class SingleFS:
             output_path = self.dm.get_output_path(fold_iteration=i)
 
             training_indexes, _ = self.dm.get_fold_data()
-            training_data = self.dm.pd_df.loc[training_indexes]
+            training_data = self.dm.pd_df.iloc[training_indexes]
 
             ranking = self.fs_method.select(training_data, output_path)
 
