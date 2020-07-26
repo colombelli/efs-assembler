@@ -13,11 +13,11 @@ class Aggregator:
 
     # selector: a Hybrid/Heterogeneous/Homogeneous object
     def aggregate(self, selector): 
-        agg_foo = importlib.import_module("engine.aggreg_algorithms."+self.aggregation_method).aggregate
+        agg_foo = importlib.import_module("efsassembler.aggreg_algorithms."+self.aggregation_method).aggregate
         return agg_foo(self, selector)
 
     def __is_heavy_required(self):
         try:
-            return importlib.import_module("engine.aggreg_algorithms."+self.aggregation_method).heavy
+            return importlib.import_module("efsassembler.aggreg_algorithms."+self.aggregation_method).heavy
         except:
             return False
