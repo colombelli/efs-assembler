@@ -263,7 +263,7 @@ class DataManager:
     def update_bootstraps_outside_cross_validation(self):
         
         num_bs_samples = len(self.pd_df)
-        numeric_indexes = list(range(num_bs_samples+1))
+        numeric_indexes = list(range(num_bs_samples))
         
         bootstraps_oob = []
         for _ in range(self.num_bootstraps):

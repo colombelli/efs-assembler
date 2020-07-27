@@ -54,7 +54,7 @@ class PySelector(FSelector):
         FSelector.__init__(self, ranking_name, script_name)
         self.py_selection = importlib.import_module("efsassembler.fs_algorithms."+script_name).select
 
-    def select(self, dataframe, output_path, save_ranking=True):
+    def select(self, dataframe, output_path=None, save_ranking=True):
         ranking = self.py_selection(dataframe)
         if save_ranking:
             dm.save_encoded_ranking(ranking, output_path+self.ranking_name)

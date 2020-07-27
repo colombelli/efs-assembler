@@ -163,6 +163,7 @@ class Experiments:
         im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
         
         print("\n")
+        dm.encode_main_dm_df()
         ensemble.select_features()
 
         print("\nDone!\n\n")
@@ -204,6 +205,7 @@ class Experiments:
         im.create_csv_tables()
 
         print("\n")
+        dm.encode_main_dm_df()
         ensemble.select_features()
 
         print("\nDone!\n\n")
@@ -245,6 +247,7 @@ class Experiments:
         im.create_csv_tables()
 
         print("\n")
+        dm.encode_main_dm_df()
         ensemble.select_features()
 
         print("\nDone!\n\n")
@@ -286,6 +289,7 @@ class Experiments:
         im.create_csv_tables()
 
         print("\n")
+        dm.encode_main_dm_df()
         feature_selector.select_features()
 
         print("\nDone!\n\n")
