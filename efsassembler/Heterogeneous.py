@@ -69,7 +69,7 @@ class Heterogeneous:
             )
         
         self.__set_rankings_to_aggregate(rankings)
-        file_path = output_path + "/" + AGGREGATED_RANKING_FILE_NAME
+        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
         for th in self.thresholds:
             print("\nAggregating rankings...")
             print("\n\nThreshold:", th)

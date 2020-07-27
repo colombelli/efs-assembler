@@ -61,7 +61,7 @@ class Experiments:
 
     def mount_experiment_folder_name(self, i, count, exp, ds_path):
 
-        sufix = "_E" + str(count+i) + "/"
+        sufix = "_E" + str(count+i+1) + "/"
         rad = exp["type"] + "_" + ds_path.split('/')[-1].split('.')[0]
         return rad+sufix
 
@@ -76,7 +76,6 @@ class Experiments:
             for dataset_path in exp["datasets"]:
             
                 exp_name = self.mount_experiment_folder_name(i, exp_count, exp, dataset_path)
-                exp_count += 1
                 complete_results_path = self.results_path + exp_name
 
                 int_folds = round(int(exp["folds"]))

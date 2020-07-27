@@ -1,3 +1,6 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #disables tf logs
+
 import tensorflow as tf
 from keras.models import Model
 from keras.layers import Input, Dense
