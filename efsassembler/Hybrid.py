@@ -180,7 +180,8 @@ class Hybrid:
                 file_path = self.dm.get_output_path(fold_iteration=fold_iteration) + \
                                 AGGREGATED_RANKING_FILE_NAME + str(th) 
             else:
-                file_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
+                file_path = self.dm.results_path + SELECTION_PATH + \
+                        AGGREGATED_RANKING_FILE_NAME + str(th) 
 
             self.__set_rankings_to_aggregate(snd_layer_rankings)
             final_ranking = self.snd_aggregator.aggregate(self)
