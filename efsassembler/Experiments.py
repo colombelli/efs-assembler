@@ -161,6 +161,9 @@ class Experiments:
         print("\n\nCreating csv files...")
         sys.stdout.flush()
         im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
+        
+        print("\n")
+        ensemble.select_features()
 
         print("\nDone!\n\n")
         print("#################################################################\n")
@@ -240,6 +243,9 @@ class Experiments:
         print("\n\nCreating csv files...")
         sys.stdout.flush()
         im.create_csv_tables()
+
+        print("\n")
+        ensemble.select_features()
 
         print("\nDone!\n\n")
         print("#################################################################\n")
