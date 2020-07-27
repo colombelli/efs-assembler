@@ -19,6 +19,7 @@ class Experiments:
         {
             "type": <experiment type>,
             "seed": <int>,
+            "thresholds": [<int for threshold1>, <int for threshold2>, ... , <int for thresholdn>]
             "folds": <int number of folds for the StratifiedKFold cross-validation>,
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
             "aggregators": [<aggregator1 object>, <aggregator2 object>],
@@ -33,24 +34,23 @@ class Experiments:
             "hyb" for hybrid ensemble
 
         <agreggator object>:
-            "aggregation_method.py"
+            "aggregation_method_file_name"
 
         <selector object>:
-            a tuple: ("selector_method.py", <programming language object>, "ranking_file_name.rds")
+            a tuple: ("selector_method_file_name", <programming language object>, "ranking_file_name.rds")
 
         <programming language object>
             either "python" or "r"
 
 
 
-        Note: "aggregators", "selectors" and "datasets" properties need to be lists, even if
+        Note: "thresholds", "aggregators", "selectors" and "datasets" properties need to be lists, even if
                 they have only one element. The same goes for experiments object itself. 
     """
 
-    def __init__(self, experiments, results_path, thresholds):
+    def __init__(self, experiments, results_path):
 
         self.experiments = experiments
-        self.ths = thresholds
 
         if results_path[-1] != "/":
             self.results_path = results_path + "/"
@@ -81,26 +81,29 @@ class Experiments:
 
                 int_folds = round(int(exp["folds"]))
                 int_seed = round(int(exp["seed"]))
-                int_bootstraps = round(int(exp["bootstraps"]))
+                
+                ths = exp["thresholds"]
 
                 if exp["type"] == 'sin':
                     self.perform_selection_single(dataset_path, complete_results_path, exp["selectors"],
-                                                    int_folds, int_seed, self.ths)
+                                                    int_folds, int_seed, ths)
 
                 elif exp["type"] == 'hom':
+                    int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hom(dataset_path, complete_results_path,
                                                 exp["selectors"], exp["aggregators"][0], int_folds,
-                                                int_bootstraps, int_seed, self.ths)
+                                                int_bootstraps, int_seed, ths)
 
                 elif exp["type"] == 'het':
                     self.perform_selection_het(dataset_path, complete_results_path,
                                                 exp["selectors"], exp["aggregators"][0], int_folds,
-                                                int_seed, self.ths)
+                                                int_seed, ths)
                     
                 elif exp["type"] == 'hyb':
+                    int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hyb(dataset_path, complete_results_path, exp["selectors"], 
                                                 exp["aggregators"][0], exp["aggregators"][1], 
-                                                int_folds, int_bootstraps, int_seed, self.ths)
+                                                int_folds, int_bootstraps, int_seed, ths)
         return
 
 
