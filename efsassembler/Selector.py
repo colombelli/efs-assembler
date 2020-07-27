@@ -31,7 +31,7 @@ class FSelector:
 
 class RSelector(FSelector):
 
-    def select(self, dataframe, output_path):
+    def select(self, dataframe, output_path=None, save_ranking=True):
         dataframe = dm.pandas_to_r(dataframe)
 
         this_file_path = os.path.dirname(__file__)
@@ -41,7 +41,8 @@ class RSelector(FSelector):
         ranking = robjects.r["select"](dataframe)
         ranking = dm.r_to_pandas(ranking)
         
-        dm.save_encoded_ranking(ranking, output_path+self.ranking_name)
+        if save_ranking:
+            dm.save_encoded_ranking(ranking, output_path+self.ranking_name)
 
         robjects.r['rm']('select')
         return ranking
@@ -53,7 +54,8 @@ class PySelector(FSelector):
         FSelector.__init__(self, ranking_name, script_name)
         self.py_selection = importlib.import_module("efsassembler.fs_algorithms."+script_name).select
 
-    def select(self, dataframe, output_path):
+    def select(self, dataframe, output_path, save_ranking=True):
         ranking = self.py_selection(dataframe)
-        dm.save_encoded_ranking(ranking, output_path+self.ranking_name)
+        if save_ranking:
+            dm.save_encoded_ranking(ranking, output_path+self.ranking_name)
         return ranking

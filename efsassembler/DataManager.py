@@ -260,6 +260,33 @@ class DataManager:
         return
 
     
+    def update_bootstraps_outside_cross_validation(self):
+        
+        num_bs_samples = len(self.pd_df)
+        numeric_indexes = list(range(num_bs_samples+1))
+        
+        bootstraps_oob = []
+        for _ in range(self.num_bootstraps):
+            bootstrap = resample(numeric_indexes, replace=True, n_samples=num_bs_samples,
+                                random_state=self.seed)
+            oob = np.array([x for x in numeric_indexes if x not in bootstrap])
+            bootstraps_oob.append((bootstrap, oob))
+            self.update_seed()  # in order to keep deterministically (but "randomly") sampling
+
+        self.current_bootstraps = bootstraps_oob
+        self.__save_bootstraps_outside_cv()
+        return 
+
+    
+    def __save_bootstraps_outside_cv(self):
+        path = self.results_path + SELECTION_PATH
+        for i, bootstrap in enumerate(self.current_bootstraps):
+            file = path + "bootstrap_sampling_" + str(i+1) + ".pkl" 
+            with open(file, 'wb') as f:
+                pickle.dump(bootstrap, f)
+        return
+
+    
     def update_seed(self):
         self.seed = np.random.randint(0, high=MAX_SEED)
         with open(self.results_path+"seed.pkl", 'wb') as f:

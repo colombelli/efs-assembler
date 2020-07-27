@@ -1,7 +1,7 @@
 from efsassembler.Selector import PySelector, RSelector
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
 
 class Hybrid:
     
@@ -20,8 +20,10 @@ class Hybrid:
 
         if self.fst_aggregator.heavy or self.snd_aggregator.heavy:
             self.select_features_experiment = self.select_features_heavy_experiment
+            self.select_features = self.select_features_heavy
         else:
             self.select_features_experiment = self.select_features_light_experiment
+            self.select_features = self.select_features_light
 
         self.rankings_to_aggregate = None
             
@@ -80,26 +82,36 @@ class Hybrid:
         return
 
 
-    def __aggregate_light_fst_layer(self, bootstrap_num, snd_layer_rankings):
+    def __aggregate_light_fst_layer(self, bootstrap_num, snd_layer_rankings, in_experiment=True):
+        
         fold_iteration = self.dm.current_fold_iteration
-        output_path = self.dm.get_output_path(fold_iteration, bootstrap_num)
-        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+
+        if in_experiment:
+            output_path = self.dm.get_output_path(fold_iteration, bootstrap_num)
+            file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+        
 
         for th in self.thresholds:
             print("\n\nThreshold:", th)
             print("\nAggregating Level 1 rankings...")
             self.current_threshold = th
             fs_aggregation = self.fst_aggregator.aggregate(self)
-            self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
+            if in_experiment:
+                self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
             snd_layer_rankings[th].append(fs_aggregation)
 
         return
 
     
-    def __aggregate_light_snd_layer(self, snd_layer_rankings):
+    def __aggregate_light_snd_layer(self, snd_layer_rankings, in_experiment=True):
         fold_iteration = self.dm.current_fold_iteration
-        output_path = self.dm.get_output_path(fold_iteration=fold_iteration)
-        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+
+        if in_experiment:
+            output_path = self.dm.get_output_path(fold_iteration=fold_iteration)
+            file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+
+        else:
+            file_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
 
         for th in self.thresholds:
             print("\n\nThreshold:", th)
@@ -142,7 +154,7 @@ class Hybrid:
         return
 
 
-    def __aggregate_heavy(self):
+    def __aggregate_heavy(self, in_experiment=True):
 
         fold_iteration = self.dm.current_fold_iteration
         for th in self.thresholds:
@@ -154,16 +166,22 @@ class Hybrid:
                 fs_aggregations = self.fst_aggregator.aggregate(self)
             else:
                 fs_aggregations = self.__fst_aggregate_not_heavy(th)
-                
-            for bs_num, fs_aggregation in enumerate(fs_aggregations):
-                output_path = self.dm.get_output_path(fold_iteration, bs_num)
-                file_path = output_path + AGGREGATED_RANKING_FILE_NAME + str(th)
-                self.dm.save_encoded_ranking(fs_aggregation, file_path)
+
+            if in_experiment: 
+                for bs_num, fs_aggregation in enumerate(fs_aggregations):
+                    output_path = self.dm.get_output_path(fold_iteration, bs_num)
+                    file_path = output_path + AGGREGATED_RANKING_FILE_NAME + str(th)
+                    self.dm.save_encoded_ranking(fs_aggregation, file_path)
             
             snd_layer_rankings = fs_aggregations
             print("\nAggregating Level 2 rankings...")
-            file_path = self.dm.get_output_path(fold_iteration=fold_iteration) + \
-                            AGGREGATED_RANKING_FILE_NAME + str(th) 
+
+            if in_experiment:
+                file_path = self.dm.get_output_path(fold_iteration=fold_iteration) + \
+                                AGGREGATED_RANKING_FILE_NAME + str(th) 
+            else:
+                file_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
+
             self.__set_rankings_to_aggregate(snd_layer_rankings)
             final_ranking = self.snd_aggregator.aggregate(self)
             self.dm.save_encoded_ranking(final_ranking, file_path)
@@ -182,13 +200,68 @@ class Hybrid:
         return fs_aggregations
 
 
+
+    def __set_rankings_to_aggregate(self, rankings):
+        self.rankings_to_aggregate = rankings
+        return
+
+    
+    def select_features_light(self):
+    
+        print("Selecting features using the whole dataset...")
+        self.dm.update_bootstraps_outside_cross_validation()
+            
+        # initializes snd_layer_ranking
+        snd_layer_rankings = {}
+        for th in self.thresholds:
+            snd_layer_rankings[th] = []
+
+        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
+            print("\n\nBootstrap: ", j+1, "\n")
+            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+
+    
+            fst_layer_rankings = []
+            for fs_method in self.fs_methods:   
+                print("")
+                fst_layer_rankings.append(
+                    fs_method.select(bootstrap_data, save_ranking=False)
+                )
+            
+            self.__set_rankings_to_aggregate(fst_layer_rankings)
+            self.__aggregate_light_fst_layer(j, snd_layer_rankings, in_experiment=False)
+        
+
+        self.__aggregate_light_snd_layer(snd_layer_rankings, in_experiment=False)
+        return
+
+    
+    def select_features_heavy(self):
+
+        print("Selecting features using the whole dataset...")
+        self.dm.update_bootstraps_outside_cross_validation()
+            
+        bs_rankings = {}
+        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
+            print("\n\nBootstrap: ", j+1, "\n")
+            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+    
+            fst_layer_rankings = []
+            for fs_method in self.fs_methods:   
+                print("")
+                fst_layer_rankings.append(
+                    fs_method.select(bootstrap_data, save_ranking=False)
+                )
+            
+            bs_rankings[j] = fst_layer_rankings
+        self.dm.set_bs_rankings(bs_rankings)
+
+        self.__aggregate_heavy(in_experiment=False) 
+        return
+
+
     # method for reusing the selection results of previous selection proccess
     # also useful for getting the performance of different thresholds used in stability
     # wheightened aggregation (which, if has more than one th, uses the mean th value)
     def post_aggregation(self):
-        return
-
-
-    def __set_rankings_to_aggregate(self, rankings):
-        self.rankings_to_aggregate = rankings
         return

@@ -1,7 +1,7 @@
 from efsassembler.Selector import FSelector, PySelector, RSelector
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
 
 class Homogeneous:
     
@@ -53,22 +53,22 @@ class Homogeneous:
         self.rankings_to_aggregate = rankings
         return
 
-"""
+
     def select_features(self):
 
         print("Selecting features using the whole dataset...")
+        self.dm.update_bootstraps_outside_cross_validation()
 
         rankings = []
         for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
             print("\n\nBootstrap: ", j+1, "\n")
             
             bootstrap_data = self.dm.pd_df.iloc[bootstrap]
-            rankings.append(self.fs_method.select(bootstrap_data, output_path))
+            rankings.append(self.fs_method.select(bootstrap_data, save_ranking=False))
 
-            
         self.__set_rankings_to_aggregate(rankings)
 
-        output_path = self.dm.get_output_path(fold_iteration=i)
+        output_path = self.dm.results_path + SELECTION_PATH
         file_path = output_path + AGGREGATED_RANKING_FILE_NAME
         for th in self.thresholds:
             print("\nAggregating rankings...")
@@ -78,4 +78,3 @@ class Homogeneous:
             
             self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
         return
-"""
