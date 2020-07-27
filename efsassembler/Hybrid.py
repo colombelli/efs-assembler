@@ -19,9 +19,9 @@ class Hybrid:
         self.snd_aggregator = Aggregator(second_aggregator)
 
         if self.fst_aggregator.heavy or self.snd_aggregator.heavy:
-            self.select_features = self.select_features_heavy
+            self.select_features_experiment = self.select_features_heavy_experiment
         else:
-            self.select_features = self.select_features_light
+            self.select_features_experiment = self.select_features_light_experiment
 
         self.rankings_to_aggregate = None
             
@@ -45,7 +45,7 @@ class Hybrid:
 
 
 
-    def select_features_light(self):
+    def select_features_light_experiment(self):
     
         for i in range(self.dm.num_folds):
             
@@ -112,7 +112,7 @@ class Hybrid:
         return
 
 
-    def select_features_heavy(self):
+    def select_features_heavy_experiment(self):
     
         for i in range(self.dm.num_folds):
             

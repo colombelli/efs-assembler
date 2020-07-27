@@ -14,7 +14,7 @@ class SingleFS:
 
 
 
-    def select_features(self):
+    def select_features_experiment(self):
 
         for i in range(self.dm.num_folds):
             print("\n\n################# Fold iteration:", i+1, "#################")

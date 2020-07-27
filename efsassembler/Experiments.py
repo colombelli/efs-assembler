@@ -137,7 +137,7 @@ class Experiments:
         ensemble = Hybrid(dm, selectors, aggregator1, aggregator2, ths)
 
         st = time()
-        ensemble.select_features()
+        ensemble.select_features_experiment()
         self.compute_print_time(st)
 
         print("\n\nDecoding dataframe...")
@@ -183,7 +183,7 @@ class Experiments:
         ensemble = Heterogeneous(dm, selectors, aggregator, ths)
 
         st = time()
-        ensemble.select_features()
+        ensemble.select_features_experiment()
         self.compute_print_time(st)
 
         print("\n\nDecoding dataframe...")
@@ -221,7 +221,7 @@ class Experiments:
         ensemble = Homogeneous(dm, selector, aggregator, ths)
 
         st = time()
-        ensemble.select_features() 
+        ensemble.select_features_experiment() 
         self.compute_print_time(st)
 
         print("\n\nDecoding dataframe...")
@@ -259,7 +259,7 @@ class Experiments:
         feature_selector = SingleFS(dm, selector, ths)
 
         st = time()
-        feature_selector.select_features()
+        feature_selector.select_features_experiment()
         self.compute_print_time(st)
 
         print("\n\nDecoding dataframe...")
