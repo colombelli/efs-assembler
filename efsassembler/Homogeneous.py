@@ -52,3 +52,30 @@ class Homogeneous:
     def __set_rankings_to_aggregate(self, rankings):
         self.rankings_to_aggregate = rankings
         return
+
+"""
+    def select_features(self):
+
+        print("Selecting features using the whole dataset...")
+
+        rankings = []
+        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
+            print("\n\nBootstrap: ", j+1, "\n")
+            
+            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+            rankings.append(self.fs_method.select(bootstrap_data, output_path))
+
+            
+        self.__set_rankings_to_aggregate(rankings)
+
+        output_path = self.dm.get_output_path(fold_iteration=i)
+        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+        for th in self.thresholds:
+            print("\nAggregating rankings...")
+            print("\n\nThreshold:", th)
+            self.current_threshold = th
+            aggregation = self.aggregator.aggregate(self)
+            
+            self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
+        return
+"""

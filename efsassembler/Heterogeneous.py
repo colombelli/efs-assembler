@@ -1,7 +1,7 @@
 from efsassembler.Selector import FSelector, PySelector, RSelector
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
 
 class Heterogeneous:
     
@@ -52,4 +52,29 @@ class Heterogeneous:
 
     def __set_rankings_to_aggregate(self, rankings):
         self.rankings_to_aggregate = rankings
+        return
+
+
+    # just select the features looking at the whole dataset (no cross validation envolved)
+    def select_features(self):
+        
+        print("Selecting features using the whole dataset...")
+        output_path = self.dm.results_path + SELECTION_PATH
+
+        rankings = []
+        for fs_method in self.fs_methods:   
+            print("")
+            rankings.append(
+                fs_method.select(self.dm.pd_df, output_path)
+            )
+        
+        self.__set_rankings_to_aggregate(rankings)
+        file_path = output_path + "/" + AGGREGATED_RANKING_FILE_NAME
+        for th in self.thresholds:
+            print("\nAggregating rankings...")
+            print("\n\nThreshold:", th)
+            self.current_threshold = th
+            aggregation = self.aggregator.aggregate(self)
+            
+            self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
         return

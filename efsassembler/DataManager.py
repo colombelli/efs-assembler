@@ -86,6 +86,7 @@ class DataManager:
             else: 
                 return
         
+        mkdir(self.results_path+SELECTION_PATH)
 
         for i in range(1, self.num_folds+1):
             fold_dir = self.results_path+"/fold_"+str(i)

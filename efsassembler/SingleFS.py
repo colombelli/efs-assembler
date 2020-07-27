@@ -1,6 +1,6 @@
 from efsassembler.Selector import FSelector, PySelector, RSelector
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
 
 class SingleFS:
     
@@ -36,4 +36,22 @@ class SingleFS:
                 print("\n\nThreshold:", th)
                 self.dm.save_encoded_ranking(ranking, file_path+str(th)) 
             
+        return
+
+
+
+    def select_features(self):
+
+        print("Selecting features using the whole dataset...")
+        output_path = self.dm.results_path + SELECTION_PATH
+
+        ranking = self.fs_method.select(self.dm.pd_df, output_path)
+
+        # in order to reuse Evaluator class, we need an AGGREGATED_RANKING_FILE_NAME+th
+        # accessible inside each fold iteration folder, so we simply resave the only
+        # ranking we have with the appropriate name
+        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+        for th in self.thresholds:
+            print("\n\nThreshold:", th)
+            self.dm.save_encoded_ranking(ranking, file_path+str(th)) 
         return

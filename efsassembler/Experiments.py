@@ -198,6 +198,9 @@ class Experiments:
         sys.stdout.flush()
         im.create_csv_tables()
 
+        print("\n")
+        ensemble.select_features()
+
         print("\nDone!\n\n")
         print("#################################################################\n")
         sys.stdout.flush()
@@ -273,6 +276,9 @@ class Experiments:
         print("\n\nCreating csv files...")
         sys.stdout.flush()
         im.create_csv_tables()
+
+        print("\n")
+        feature_selector.select_features()
 
         print("\nDone!\n\n")
         print("#################################################################\n")
