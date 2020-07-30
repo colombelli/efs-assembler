@@ -1,4 +1,4 @@
-from efsassembler.Constants import *
+from efsassembler.Constants import SELECTION_PATH, MAX_SEED
 import numpy as np
 import pandas as pd
 from sklearn.utils import resample

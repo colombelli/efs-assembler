@@ -7,7 +7,7 @@ from sklearn import metrics
 import numpy as np
 import efsassembler.kuncheva_index as ki
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import *
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, FINAL_CONFUSION_MATRICES_FILE_NAME, ACCURACY_METRIC, ROC_AUC_METRIC, PRECISION_RECALL_AUC_METRIC
 
 class Evaluator:
 
