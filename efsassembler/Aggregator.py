@@ -1,4 +1,6 @@
 import importlib
+import os.path
+import sys
 
 class Aggregator:
 
@@ -8,16 +10,47 @@ class Aggregator:
     #   useful if you want, for example, to measure the stability of the first layer
     #   rankings of each fs method(in the Hybrid ensemble, for example).
     def __init__(self, aggregation_method):
+        
         self.aggregation_method = aggregation_method
+        self.user_script = False
+        self._check_for_script_file()
         self.heavy = self.__is_heavy_required()
+        
 
-    # selector: a Hybrid/Heterogeneous/Homogeneous object
-    def aggregate(self, selector): 
-        agg_foo = importlib.import_module("efsassembler.aggreg_algorithms."+self.aggregation_method).aggregate
-        return agg_foo(self, selector)
+
+    def _check_for_script_file(self):
+        pkgdir = sys.modules['efsassembler'].__path__[0] + "/"
+        user_alg_path = pkgdir + "aggreg_algorithms/user_algorithms/"
+        user_script = os.path.isfile(user_alg_path + self.aggregation_method + ".py")
+
+        if user_script:
+            self.user_script = True
+        else:
+            self.user_script = False
+        return
+
 
     def __is_heavy_required(self):
         try:
-            return importlib.import_module("efsassembler.aggreg_algorithms."+self.aggregation_method).heavy
+            if self.user_script:
+                return importlib.import_module("efsassembler.aggreg_algorithms.user_algorithms" + \
+                                                self.aggregation_method).heavy
+            else:
+                return importlib.import_module("efsassembler.aggreg_algorithms." + \
+                                                self.aggregation_method).heavy
         except:
             return False
+
+
+    # selector: a Hybrid/Heterogeneous/Homogeneous object
+    def aggregate(self, selector): 
+        if self.user_script:
+            agg_foo = importlib.import_module("efsassembler.aggreg_algorithms.user_algorithms" + \
+                                                self.aggregation_method).aggregate
+        else:
+            agg_foo = importlib.import_module("efsassembler.aggreg_algorithms." + \
+                                                self.aggregation_method).aggregate
+        
+        return agg_foo(self, selector)
+
+    
