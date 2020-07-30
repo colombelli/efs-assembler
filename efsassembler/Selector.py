@@ -1,7 +1,8 @@
 from efsassembler.DataManager import DataManager as dm
 import rpy2.robjects as robjects
 import importlib
-import os
+import os.path
+import sys
 
 class FSelector:
 
@@ -10,6 +11,8 @@ class FSelector:
 
         self.ranking_name = ranking_name
         self.script_name = script_name
+        self.user_script = False
+        self._check_for_script_file()
 
     
     @classmethod
@@ -28,6 +31,18 @@ class FSelector:
         return fs_methods
 
 
+    def _check_for_script_file(self):
+        pkgdir = sys.modules['efsassembler'].__path__[0] + "/"
+        user_alg_path = pkgdir + "fs_algorithms/user_algorithms/"
+        user_r_script = os.path.isfile(user_alg_path + self.script_name + ".r")
+        user_py_script = os.path.isfile(user_alg_path + self.script_name + ".py")
+
+        if user_py_script or user_r_script:
+            self.user_script = True
+        else:
+            self.user_script = False
+        return
+
 
 class RSelector(FSelector):
 
@@ -35,7 +50,10 @@ class RSelector(FSelector):
         dataframe = dm.pandas_to_r(dataframe)
 
         this_file_path = os.path.dirname(__file__)
-        call = this_file_path + "/fs_algorithms/" + self.script_name + ".r"
+        if self.user_script:
+            call = this_file_path + "/fs_algorithms/user_algorithms/" + self.script_name + ".r"
+        else:
+            call = this_file_path + "/fs_algorithms/" + self.script_name + ".r"
         robjects.r.source(call)
 
         ranking = robjects.r["select"](dataframe)
@@ -52,7 +70,11 @@ class PySelector(FSelector):
 
     def __init__(self, ranking_name, script_name):
         FSelector.__init__(self, ranking_name, script_name)
-        self.py_selection = importlib.import_module("efsassembler.fs_algorithms."+script_name).select
+        if self.user_script:
+            self.py_selection = importlib.import_module("efsassembler.fs_algorithms.user_algorithms" + \
+                                                        script_name).select
+        else:
+            self.py_selection = importlib.import_module("efsassembler.fs_algorithms."+script_name).select
 
     def select(self, dataframe, output_path=None, save_ranking=True):
         ranking = self.py_selection(dataframe)
