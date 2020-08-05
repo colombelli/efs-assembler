@@ -7,7 +7,9 @@ def select(df):
     data = np.array(df.iloc[0:, 0:len(df.columns)-1])
     labels = np.array(df.iloc[0:, len(df.columns)-1:]).flatten()
 
-    fs = ReliefF(n_neighbors=len(labels)-1)
+    k=10  # Kononenko, 1994
+
+    fs = ReliefF(n_neighbors=k)
     print("Ranking features with ReliefF algorithm...")
     fs.fit(data, labels)
 

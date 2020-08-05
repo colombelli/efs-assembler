@@ -1,8 +1,8 @@
 from efsassembler.Constants import SELECTION_PATH, MAX_SEED
+from efsassembler.StratifiedKFold import StratifiedKFold
 import numpy as np
 import pandas as pd
 from sklearn.utils import resample
-from sklearn.model_selection import StratifiedKFold
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
@@ -211,11 +211,9 @@ class DataManager:
 
     def __calculate_folds(self):
 
-        skf = StratifiedKFold(n_splits=self.num_folds, shuffle=True, random_state=self.seed)
-        X = self.pd_df.loc[:, self.pd_df.columns != 'class']
-        y = self.pd_df.loc[:, ['class']]
-        skf.get_n_splits(X, y)
-        self.folds = list(skf.split(X, y))
+        k = self.num_folds
+        skf = StratifiedKFold(self.seed, self.pd_df, "class", k)
+        self.folds = list(skf.split())
         return
 
     
