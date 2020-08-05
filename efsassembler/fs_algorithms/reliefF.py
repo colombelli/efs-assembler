@@ -4,10 +4,14 @@ from ReliefF import ReliefF
 
 def select(df):
     
-    data = np.array(df.iloc[0:, 0:len(df.columns)-1])
-    labels = np.array(df.iloc[0:, len(df.columns)-1:]).flatten()
+    data = np.array(df.iloc[:, :-1])
+    labels = np.array(df.iloc[:, -1:]).flatten()
 
-    k=10  # Kononenko, 1994
+    #k=10  # Kononenko, 1994
+    k = len(labels)-1  # For the data we tested on, it was observed a k=10
+                       # is not suitable and selects features with significantly
+                       # lower predictive pontential (accuracy/ROC-AUC)
+
 
     fs = ReliefF(n_neighbors=k)
     print("Ranking features with ReliefF algorithm...")
