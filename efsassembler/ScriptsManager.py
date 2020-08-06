@@ -10,7 +10,8 @@ class ScriptsManager:
 
     def add_fs_algorithm(self, script_path):
         user_scripts_path = self.pkg_path + "fs_algorithms/user_algorithms/"
-        copyfile(script_path, user_scripts_path)
+        dest = user_scripts_path + script_path.split('/')[-1]
+        copyfile(script_path, dest)
         # TO-DO: Add some verification operations (repeated file etc) and messages
         return
 
@@ -38,7 +39,8 @@ class ScriptsManager:
 
     def add_aggregation_algorithm(self, script_path):
         user_scripts_path = self.pkg_path + "aggreg_algorithms/user_algorithms/"
-        copyfile(script_path, user_scripts_path)
+        dest = user_scripts_path + script_path.split('/')[-1]
+        copyfile(script_path, dest)
         # TO-DO: Add some verification operations (repeated file etc) and messages
         return
 

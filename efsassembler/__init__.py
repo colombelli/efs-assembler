@@ -8,3 +8,5 @@ from .Hybrid import Hybrid
 from .Heterogeneous import Heterogeneous
 from .Homogeneous import Homogeneous
 from .SingleFS import SingleFS
+from .ScriptsManager import ScriptsManager
+from .StratifiedKFold import StratifiedKFold
