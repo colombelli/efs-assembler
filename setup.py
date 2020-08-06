@@ -15,7 +15,7 @@ setup(
           'rpy2',
           'scikit-learn',
           'ReliefF',
-          'tensorflow',
+          'tensorflow>=2',
           'keras'
       ],
   classifiers=[
