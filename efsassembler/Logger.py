@@ -38,6 +38,11 @@ class Logger:
     def evaluating_inner_levels(self):
         Logger.handler.info("Evaluating inner levels")
         return
+
+    @classmethod
+    def ranking_features_with_script(self, script_string):
+        Logger.handler.info("Ranking features with " + script_string)
+        return
     
 
     

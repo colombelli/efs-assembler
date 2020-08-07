@@ -4,12 +4,8 @@ select <- function(df) {
   dfx <- df[c(1:nrow(df)), c(1:length(df)-1)]
   dfy <- dfy <- df$class
 
-
-  cat("Calculating Information Gain Ratio...\n")
   rankDf <- information_gain(x=dfx, y=dfy, type = "gainratio")
 
-
-  cat("Processing output...\n")
   rankDf <- rankDf[order(-rankDf$importance),,drop=FALSE]
   rownames(rankDf) <- rankDf$attributes
   rankDf$attributes <- NULL

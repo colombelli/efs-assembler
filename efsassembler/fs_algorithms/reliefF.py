@@ -14,10 +14,8 @@ def select(df):
 
 
     fs = ReliefF(n_neighbors=k)
-    print("Ranking features with ReliefF algorithm...")
     fs.fit(data, labels)
 
-    print("Processing data...")
     genes = list(df.columns)
     data = {}
     data['gene'] = []

@@ -139,7 +139,6 @@ def naive_SLP_model(x_train, y_train, x_val, y_val, hyper_param=wx_hyperparam, n
 
 def build_rank(df, sel_idx):
     
-    print("Processing data...")
     genes = list(df.columns)
     data = {}
     data['gene'] = []
@@ -172,7 +171,6 @@ def select(df):
     # Gets x data (gene expressions)
     x_all = df.iloc[:, 0:-1].values
 
-    print("Ranking features with Wx algorithm...")
     # Note: the validation data used here is the same as the training since we are not
     # interested in validation at this point of the experiments run
     hp = WxHyperParameter(epochs=30, learning_ratio=0.01, batch_size=8, verbose=False)

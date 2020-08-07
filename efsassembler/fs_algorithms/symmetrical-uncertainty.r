@@ -5,11 +5,9 @@ select <- function(df) {
   dfy <- dfy <- df$class
 
 
-  cat("Calculating SU importance...\n")
   rankDf <- information_gain(x=dfx, y=dfy, type = "symuncert")
 
 
-  cat("Processing output...\n")
   rankDf <- rankDf[order(-rankDf$importance),,drop=FALSE]
   rownames(rankDf) <- rankDf$attributes
   rankDf$attributes <- NULL

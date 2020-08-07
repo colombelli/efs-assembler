@@ -1,3 +1,4 @@
+from efsassembler.Logger import Logger
 from efsassembler.DataManager import DataManager as dm
 import rpy2.robjects as robjects
 import importlib
@@ -56,6 +57,7 @@ class RSelector(FSelector):
             call = this_file_path + "/fs_algorithms/" + self.script_name + ".r"
         robjects.r.source(call)
 
+        Logger.ranking_features_with_script(self.script_name)
         ranking = robjects.r["select"](dataframe)
         ranking = dm.r_to_pandas(ranking)
         
@@ -77,6 +79,7 @@ class PySelector(FSelector):
             self.py_selection = importlib.import_module("efsassembler.fs_algorithms."+script_name).select
 
     def select(self, dataframe, output_path=None, save_ranking=True):
+        Logger.ranking_features_with_script(self.script_name)
         ranking = self.py_selection(dataframe)
         if save_ranking:
             dm.save_encoded_ranking(ranking, output_path+self.ranking_name)
