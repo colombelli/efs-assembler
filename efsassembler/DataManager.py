@@ -148,7 +148,6 @@ class DataManager:
     @classmethod
     def encode_df(self, df):
         
-        print("Encoding dataframe attributes...")
         columns = []
         for attribute in df.columns:
             columns.append(self.alnum_encode(attribute))
@@ -162,7 +161,6 @@ class DataManager:
     @classmethod
     def decode_df(self, df, rows:bool):
 
-        print("Decoding dataframe attributes...")
         if not rows:
             columns = []
             for attribute in df.columns:
@@ -183,7 +181,6 @@ class DataManager:
         encoded_ranking = deepcopy(ranking)
         decoded_ranking = self.decode_df(encoded_ranking, True)
 
-        print("Saving ranking...")
         #r_decoded_ranking = self.pandas_to_r(decoded_ranking)
         #robjects.r["saveRDS"](r_decoded_ranking, file_name_and_dir)
         decoded_ranking.to_csv(file_name_and_dir+".csv")

@@ -1,3 +1,4 @@
+from efsassembler.Logger import Logger
 from efsassembler.Selector import PySelector, RSelector
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
@@ -51,7 +52,7 @@ class Hybrid:
     
         for i in range(self.dm.num_folds):
             
-            print("\n\n################# Fold iteration:", i+1, "#################")
+            Logger.fold_iteration(i+1)
             self.dm.current_fold_iteration = i
             self.dm.update_bootstraps()
              
@@ -61,14 +62,13 @@ class Hybrid:
                 snd_layer_rankings[th] = []
 
             for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-                print("\n\nBootstrap: ", j+1, "| Fold iteration:", i+1, "\n")
+                Logger.bootstrap_fold_iteration(j+1, i+1)
                 output_path = self.dm.get_output_path(i, j)
                 bootstrap_data = self.dm.pd_df.iloc[bootstrap]
 
         
                 fst_layer_rankings = []
-                for fs_method in self.fs_methods:   
-                    print("")
+                for fs_method in self.fs_methods:  
                     fst_layer_rankings.append(
                         fs_method.select(bootstrap_data, output_path)
                     )
@@ -92,8 +92,8 @@ class Hybrid:
         
 
         for th in self.thresholds:
-            print("\n\nThreshold:", th)
-            print("\nAggregating Level 1 rankings...")
+            Logger.for_threshold(th)
+            Logger.aggregating_n_level_rankings(1)
             self.current_threshold = th
             fs_aggregation = self.fst_aggregator.aggregate(self)
             if in_experiment:
@@ -114,8 +114,8 @@ class Hybrid:
             file_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
 
         for th in self.thresholds:
-            print("\n\nThreshold:", th)
-            print("\nAggregating Level 2 rankings...")
+            Logger.for_threshold(th)
+            Logger.aggregating_n_level_rankings(2)
             self.current_threshold = th
             self.__set_rankings_to_aggregate(snd_layer_rankings[th])
             fs_aggregation = self.snd_aggregator.aggregate(self)
@@ -128,20 +128,19 @@ class Hybrid:
     
         for i in range(self.dm.num_folds):
             
-            print("\n\n################# Fold iteration:", i+1, "#################")
+            Logger.fold_iteration(i+1)
             self.dm.current_fold_iteration = i
             self.dm.update_bootstraps()
 
             bs_rankings = {}
             for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-                print("\n\nBootstrap: ", j+1, "| Fold iteration:", i+1, "\n")
+                Logger.bootstrap_fold_iteration(j+1, i+1)
                 output_path = self.dm.get_output_path(i, j)
                 bootstrap_data = self.dm.pd_df.iloc[bootstrap]
 
         
                 fst_layer_rankings = []
-                for fs_method in self.fs_methods:   
-                    print("")
+                for fs_method in self.fs_methods: 
                     fst_layer_rankings.append(
                         fs_method.select(bootstrap_data, output_path)
                     )
@@ -158,8 +157,8 @@ class Hybrid:
 
         fold_iteration = self.dm.current_fold_iteration
         for th in self.thresholds:
-            print("\n\nThreshold:", th)
-            print("\nAggregating Level 1 rankings...")
+            Logger.for_threshold(th)
+            Logger.aggregating_n_level_rankings(1)
             self.current_threshold = th
 
             if self.fst_aggregator.heavy:
@@ -174,7 +173,7 @@ class Hybrid:
                     self.dm.save_encoded_ranking(fs_aggregation, file_path)
             
             snd_layer_rankings = fs_aggregations
-            print("\nAggregating Level 2 rankings...")
+            Logger.aggregating_n_level_rankings(2)
 
             if in_experiment:
                 file_path = self.dm.get_output_path(fold_iteration=fold_iteration) + \
@@ -209,7 +208,7 @@ class Hybrid:
     
     def select_features_light(self):
     
-        print("Selecting features using the whole dataset...")
+        Logger.whole_dataset_selection()
         self.dm.update_bootstraps_outside_cross_validation()
             
         # initializes snd_layer_ranking
@@ -218,13 +217,12 @@ class Hybrid:
             snd_layer_rankings[th] = []
 
         for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-            print("\n\nBootstrap: ", j+1, "\n")
+            Logger.bootstrap_iteration(j+1)
             bootstrap_data = self.dm.pd_df.iloc[bootstrap]
 
     
             fst_layer_rankings = []
             for fs_method in self.fs_methods:   
-                print("")
                 fst_layer_rankings.append(
                     fs_method.select(bootstrap_data, save_ranking=False)
                 )
@@ -239,17 +237,16 @@ class Hybrid:
     
     def select_features_heavy(self):
 
-        print("Selecting features using the whole dataset...")
+        Logger.whole_dataset_selection()
         self.dm.update_bootstraps_outside_cross_validation()
             
         bs_rankings = {}
         for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-            print("\n\nBootstrap: ", j+1, "\n")
+            Logger.bootstrap_iteration(j+1)
             bootstrap_data = self.dm.pd_df.iloc[bootstrap]
     
             fst_layer_rankings = []
             for fs_method in self.fs_methods:   
-                print("")
                 fst_layer_rankings.append(
                     fs_method.select(bootstrap_data, save_ranking=False)
                 )

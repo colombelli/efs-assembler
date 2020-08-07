@@ -43,6 +43,40 @@ class Logger:
     def ranking_features_with_script(self, script_string):
         Logger.handler.info("Ranking features with " + script_string)
         return
-    
 
+    @classmethod
+    def fold_iteration(self, fold_iteration):
+        Logger.handler.info("Starting fold iteration " + str(fold_iteration))
+        return
     
+    @classmethod
+    def whole_dataset_selection(self):
+        Logger.handler.info("Selecting features using the whole dataset")
+        return
+    
+    @classmethod
+    def for_threshold(self, threshold):
+        Logger.handler.info("Threshold: " + str(threshold))
+        return
+
+    @classmethod
+    def aggregating_rankings(self):
+        Logger.handler.info("Aggregating rankings")
+        return
+    
+    @classmethod
+    def aggregating_n_level_rankings(self, level):
+        log = "Aggregating level " + str(level) + " rankings"
+        Logger.handler.info(log)
+        return
+
+    @classmethod
+    def bootstrap_fold_iteration(self, bootstrap_it, fold_it):
+        log = "Bootstrap: " + str(bootstrap_it) + " | Fold iteration: " + str(fold_it)
+        Logger.handler.info(log)
+        return
+
+    @classmethod
+    def bootstrap_iteration(self, bootstrap_it):
+        Logger.handler.info("Bootstrap: " + str(bootstrap_it))
+        return

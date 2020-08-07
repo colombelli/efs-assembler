@@ -1,3 +1,4 @@
+from efsassembler.Logger import Logger
 from efsassembler.Selector import FSelector, PySelector, RSelector
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
@@ -21,7 +22,7 @@ class Heterogeneous:
     def select_features_experiment(self):
 
         for i in range(self.dm.num_folds):
-            print("\n\n################# Fold iteration:", i+1, "#################")
+            Logger.fold_iteration(i+1)
             
             self.dm.current_fold_iteration = i
             output_path = self.dm.get_output_path(fold_iteration=i)
@@ -31,7 +32,6 @@ class Heterogeneous:
             
             rankings = []
             for fs_method in self.fs_methods:   
-                print("")
                 rankings.append(
                     fs_method.select(training_data, output_path)
                 )
@@ -41,8 +41,8 @@ class Heterogeneous:
             output_path = self.dm.get_output_path(fold_iteration=i)
             file_path = output_path + AGGREGATED_RANKING_FILE_NAME
             for th in self.thresholds:
-                print("\nAggregating rankings...")
-                print("\n\nThreshold:", th)
+                Logger.aggregating_rankings()
+                Logger.for_threshold(th)
                 self.current_threshold = th
                 aggregation = self.aggregator.aggregate(self)
                 
@@ -58,12 +58,11 @@ class Heterogeneous:
     # just select the features looking at the whole dataset (no cross validation envolved)
     def select_features(self):
         
-        print("Selecting features using the whole dataset...")
+        Logger.whole_dataset_selection()
         output_path = self.dm.results_path + SELECTION_PATH
 
         rankings = []
-        for fs_method in self.fs_methods:   
-            print("")
+        for fs_method in self.fs_methods:  
             rankings.append(
                 fs_method.select(self.dm.pd_df, output_path)
             )
@@ -71,8 +70,8 @@ class Heterogeneous:
         self.__set_rankings_to_aggregate(rankings)
         file_path = output_path + AGGREGATED_RANKING_FILE_NAME
         for th in self.thresholds:
-            print("\nAggregating rankings...")
-            print("\n\nThreshold:", th)
+            Logger.aggregating_rankings()
+            Logger.for_threshold(th)
             self.current_threshold = th
             aggregation = self.aggregator.aggregate(self)
             
