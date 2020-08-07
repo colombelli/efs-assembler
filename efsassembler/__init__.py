@@ -10,3 +10,4 @@ from .Homogeneous import Homogeneous
 from .SingleFS import SingleFS
 from .ScriptsManager import ScriptsManager
 from .StratifiedKFold import StratifiedKFold
+from .Logger import Logger

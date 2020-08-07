@@ -71,7 +71,7 @@ class PySelector(FSelector):
     def __init__(self, ranking_name, script_name):
         FSelector.__init__(self, ranking_name, script_name)
         if self.user_script:
-            self.py_selection = importlib.import_module("efsassembler.fs_algorithms.user_algorithms" + \
+            self.py_selection = importlib.import_module("efsassembler.fs_algorithms.user_algorithms." + \
                                                         script_name).select
         else:
             self.py_selection = importlib.import_module("efsassembler.fs_algorithms."+script_name).select
