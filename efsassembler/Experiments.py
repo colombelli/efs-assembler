@@ -105,7 +105,7 @@ class Experiments:
         return
 
 
-    def compute_print_time(self, st):
+    def compute_time_taken(self, st):
         
         end = time()
         hours, rem = divmod(end-st, 3600)
@@ -135,35 +135,27 @@ class Experiments:
 
         st = time()
         ensemble.select_features_experiment()
-        self.compute_print_time(st)
+        self.compute_time_taken(st)
 
-        print("\n\nDecoding dataframe...")
-        sys.stdout.flush()
+        Logger.decoding_dataframe()
         dm.decode_main_dm_df()
 
-        print("\nStarting evaluation process...")
-        sys.stdout.flush()
+        Logger.starting_evaluation_process()
         ev.evaluate_final_rankings()
 
-        print("\n\nCreating csv files...")
-        sys.stdout.flush()
+        Logger.creating_csv_files()
         im.create_csv_tables()
 
-        print("\nEvaluating inner levels...")
-        sys.stdout.flush()
+        Logger.evaluating_inner_levels()
         level1_evaluation, level2_evaluation = ev.evaluate_intermediate_hyb_rankings()
 
-        print("\n\nCreating csv files...")
-        sys.stdout.flush()
+        Logger.creating_csv_files()
         im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
         
-        print("\n")
         dm.encode_main_dm_df()
         ensemble.select_features()
 
-        print("\nDone!\n\n")
-        print("#################################################################\n")
-        sys.stdout.flush()
+        Logger.end_experiment_message()
         return
 
 
@@ -185,27 +177,21 @@ class Experiments:
 
         st = time()
         ensemble.select_features_experiment()
-        self.compute_print_time(st)
+        self.compute_time_taken(st)
 
-        print("\n\nDecoding dataframe...")
-        sys.stdout.flush()
+        Logger.decoding_dataframe()
         dm.decode_main_dm_df()
 
-        print("\nStarting evaluation process...")
-        sys.stdout.flush()
+        Logger.starting_evaluation_process()
         ev.evaluate_final_rankings()
 
-        print("\n\nCreating csv files...")
-        sys.stdout.flush()
+        Logger.creating_csv_files()
         im.create_csv_tables()
 
-        print("\n")
         dm.encode_main_dm_df()
         ensemble.select_features()
 
-        print("\nDone!\n\n")
-        print("#################################################################\n")
-        sys.stdout.flush()
+        Logger.end_experiment_message()
         return
 
     
@@ -227,27 +213,21 @@ class Experiments:
 
         st = time()
         ensemble.select_features_experiment() 
-        self.compute_print_time(st)
+        self.compute_time_taken(st)
 
-        print("\n\nDecoding dataframe...")
-        sys.stdout.flush()
+        Logger.decoding_dataframe()
         dm.decode_main_dm_df()
 
-        print("\nStarting evaluation process...")
-        sys.stdout.flush()
+        Logger.starting_evaluation_process()
         ev.evaluate_final_rankings()
 
-        print("\n\nCreating csv files...")
-        sys.stdout.flush()
+        Logger.creating_csv_files()
         im.create_csv_tables()
 
-        print("\n")
         dm.encode_main_dm_df()
         ensemble.select_features()
 
-        print("\nDone!\n\n")
-        print("#################################################################\n")
-        sys.stdout.flush()
+        Logger.end_experiment_message()
         return
 
     
@@ -269,26 +249,21 @@ class Experiments:
 
         st = time()
         feature_selector.select_features_experiment()
-        self.compute_print_time(st)
+        self.compute_time_taken(st)
 
-        print("\n\nDecoding dataframe...")
-        sys.stdout.flush()
+        Logger.decoding_dataframe()
         dm.decode_main_dm_df()
 
-        print("\nStarting evaluation process...")
-        sys.stdout.flush()
+        Logger.starting_evaluation_process()
         ev.evaluate_final_rankings()
 
-        print("\n\nCreating csv files...")
-        sys.stdout.flush()
+        Logger.creating_csv_files()
         im.create_csv_tables()
 
-        print("\n")
+        
         dm.encode_main_dm_df()
         feature_selector.select_features()
 
-        print("\nDone!\n\n")
-        print("#################################################################\n")
-        sys.stdout.flush()
+        Logger.end_experiment_message()
         return
 
