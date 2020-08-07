@@ -2,7 +2,7 @@ import pandas as pd
 import pickle
 import glob
 from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
+#from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import metrics
 import numpy as np
 import efsassembler.kuncheva_index as ki

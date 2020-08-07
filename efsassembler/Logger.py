@@ -1,12 +1,13 @@
 import sys
 import logging
-
+import os
 
 
 class Logger:
 
     logging.basicConfig(stream=sys.stdout, level=logging.NOTSET)
     handler = logging.getLogger("efs-assembler")
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #disables tf logs
 
     @classmethod
     def time_taken(self, formatted_time_string):

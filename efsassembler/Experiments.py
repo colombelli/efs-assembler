@@ -11,6 +11,7 @@ from efsassembler.SingleFS import SingleFS
 from efsassembler.Evaluator import Evaluator
 from efsassembler.InformationManager import InformationManager
 
+import rpy2.robjects.packages as rpackages
 
 class Experiments:
 
@@ -51,6 +52,7 @@ class Experiments:
 
     def __init__(self, experiments, results_path):
 
+        rpackages.quiet_require('FSelectorRcpp')
         self.experiments = experiments
 
         if results_path[-1] != "/":
