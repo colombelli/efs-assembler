@@ -6,6 +6,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import metrics
 import numpy as np
 import efsassembler.kuncheva_index as ki
+from efsassembler.Logger import Logger
 from efsassembler.DataManager import DataManager
 from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, FINAL_CONFUSION_MATRICES_FILE_NAME, ACCURACY_METRIC, ROC_AUC_METRIC, PRECISION_RECALL_AUC_METRIC
 
@@ -56,14 +57,13 @@ class Evaluator:
 
             int_th = int(dataset_len * th/100)
             if not(int_th):
-                print("0 int threshold value detected for fraction", th, "- skipping.")
+                Logger.zero_int_threshold(th)
                 continue
 
             updated_fraction_thresholds.append(th)
             int_thresholds.append(int_th)
 
-        print("\nNumber of genes to select given the threshold percentages:")
-        print(int_thresholds, "\n\n")
+        Logger.integer_number_of_thresholds(int_thresholds)
         return int_thresholds, updated_fraction_thresholds
 
 
@@ -76,18 +76,17 @@ class Evaluator:
         for th in thresholds:
 
             if not(th):
-                print("0 int threshold value detected for fraction", th, "- skipping.")
+                Logger.zero_int_threshold(th)
                 continue
 
             if th > dataset_len - 1:
-                print("Given threshold value,", str(th)+", is greater the number of features - skipping.")
+                Logger.int_threshold_greater_than_dataset(th)
 
             updated_int_thresholds.append(th)
             frac_th = (th * 100) / dataset_len
             frac_thresholds.append(frac_th)
 
-        print("\nNumber of genes to select given the threshold percentages:")
-        print(updated_int_thresholds, "\n\n")
+        Logger.integer_number_of_thresholds(updated_int_thresholds)
         return updated_int_thresholds, frac_thresholds
 
 
@@ -156,12 +155,12 @@ class Evaluator:
         
         self.current_eval_level = 3
 
-        print("Computing stabilities...")
+        Logger.computing_stabilities()
         stabilities = self.__compute_stabilities()
 
         with open(self.dm.results_path+"fold_sampling.pkl", 'rb') as file:
                 folds_sampling = pickle.load(file)
-        print("Computing prediction performances...")
+        Logger.computing_prediction_performances()
         prediction_performances = self.__compute_prediction_performances(folds_sampling)
 
         self.__save_confusion_matrices(FINAL_CONFUSION_MATRICES_FILE_NAME)
@@ -280,11 +279,11 @@ class Evaluator:
         
         level1_rankings, level2_rankings = self.__get_intermediate_rankings()
         
-        print("\nEvaluating level 1 rankings...")
+        Logger.evaluating_n_level(1)
         self.current_eval_level = 1
         level1_evaluation = self.__evaluate_level1_rankings(level1_rankings)
 
-        print("\n\nEvaluating level 2 rankings...")
+        Logger.evaluating_n_level(2)
         self.current_eval_level = 2
         level2_evaluation = self.__evaluate_intermediate_rankings(level2_rankings)        
         return level1_evaluation, level2_evaluation
@@ -297,7 +296,7 @@ class Evaluator:
                                 # evaluation
 
         for fs_method in level1_rankings:
-            print("\nEvaluating", fs_method, "FS method")
+            Logger.evaluating_x_fs_method(fs_method)
             level1_evaluation[fs_method] = self.__evaluate_intermediate_rankings(
                                                         level1_rankings[fs_method])
         return level1_evaluation
@@ -317,11 +316,11 @@ class Evaluator:
         stabilities = []
         for i, fold_rankings in enumerate(final_rankings):
 
-            print("Computing stabilities...")
+            Logger.computing_stabilities()
             stabilities.append(self.__compute_stabilities(fold_rankings))
 
             
-            print("Computing prediction performances...")
+            Logger.computing_prediction_performances()
             acc, roc, pr = self.__compute_intermediate_pred_perf(folds_sampling[i], fold_rankings) 
             prediction_performances[ACCURACY_METRIC] += acc
             prediction_performances[ROC_AUC_METRIC] += roc
@@ -363,9 +362,9 @@ class Evaluator:
         # }
 
         self.__init_level1_rankings_dict(level1_rankings)
-        print("Loading level 1 rankings...")
+        Logger.loading_lvl1_rankings()
         self.__load_level1_rankings(level1_rankings)
-        print("Build level 2 ranking paths...")
+        Logger.loading_lvl2_ranking_paths()
         self.__load_level2_ranking_paths(level2_rankings_paths)
 
         return level1_rankings, level2_rankings_paths

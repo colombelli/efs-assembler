@@ -1,3 +1,4 @@
+from efsassembler.Logger import Logger
 from efsassembler.DataManager import DataManager
 from efsassembler.Evaluator import Evaluator
 from efsassembler.Constants import *
@@ -202,7 +203,7 @@ class InformationManager:
 
 
     def create_intermediate_csv_tables(self, level1_evaluation, level2_evaluation):
-        print("\nCreating intermediate results csv files...")
+        Logger.create_inner_results_csv_files()
         self.__create_intermediate_results_folder()
         self.__create_level1_csv_tables(level1_evaluation)
         self.__create_level2_csv_tables(level2_evaluation[0], level2_evaluation[1])
@@ -214,8 +215,11 @@ class InformationManager:
         try:
             mkdir(fold_dir)
         except:
+            """
             print("Impossible to create directory:", fold_dir)
             print("Either due to pre-path inexistence or because folder already exists.")
+            """
+            #TO-DO: warning/error or something like that
         return
 
 

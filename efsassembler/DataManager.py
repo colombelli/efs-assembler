@@ -1,3 +1,4 @@
+from efsassembler.Logger import Logger
 from efsassembler.Constants import SELECTION_PATH, MAX_SEED
 from efsassembler.StratifiedKFold import StratifiedKFold
 import numpy as np
@@ -56,7 +57,7 @@ class DataManager:
 
     def __load_dataset(self):
 
-        print("Loading dataset...")
+        Logger.loading_x_dataset(self.file_path)
         if self.file_path[-3:] == "rds":
             self.r_df = self.load_RDS(self.file_path)
             self.pd_df = self.r_to_pandas(self.r_df)
@@ -74,17 +75,20 @@ class DataManager:
 
     def create_results_dir(self):
 
-        print("Creating results directory...")
-        print(self.results_path)
+        Logger.creating_results_directory_in_x_path(self.results_path)
         try:
             mkdir(self.results_path)
         except:
+            """
             print("Given directory already created, files will be replaced.")
             print("Note that if there's any missing folder inside this existent one, the execution will fail.")
             if input("Input c to cancel or any other key to continue... ") == "c":
                 exit()
             else: 
                 return
+            """
+            #Throw error message
+            exit()
         
         mkdir(self.results_path+SELECTION_PATH)
 

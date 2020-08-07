@@ -125,6 +125,7 @@ class Experiments:
         str_selectors = [i[0] for i in selectors]
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
         dm.init_data_folding_process()
@@ -152,6 +153,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
         
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         ensemble.select_features()
 
@@ -167,6 +169,7 @@ class Experiments:
         num_bootstraps = 0
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
         dm.init_data_folding_process()
@@ -188,6 +191,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         ensemble.select_features()
 
@@ -203,6 +207,7 @@ class Experiments:
         str_selectors = [selector[0][0]]
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
         dm.init_data_folding_process()
@@ -224,6 +229,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         ensemble.select_features()
 
@@ -239,6 +245,7 @@ class Experiments:
         str_selectors = [selector[0][0]]    # because selector is always a list, even when it have only one element
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
         dm.init_data_folding_process()
@@ -260,7 +267,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        
+        Logger.encoding_dataset()
         dm.encode_main_dm_df()
         feature_selector.select_features()
 
