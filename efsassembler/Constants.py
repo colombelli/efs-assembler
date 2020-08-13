@@ -1,4 +1,3 @@
-MAX_SEED = 9999999
 AGGREGATED_RANKING_FILE_NAME = "agg_ranking_th"
 SELECTION_PATH = "/selection/"
 

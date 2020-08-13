@@ -1,5 +1,5 @@
 from efsassembler.Logger import Logger
-from efsassembler.Constants import SELECTION_PATH, MAX_SEED
+from efsassembler.Constants import SELECTION_PATH
 from efsassembler.StratifiedKFold import StratifiedKFold
 import numpy as np
 import pandas as pd
@@ -19,7 +19,7 @@ from copy import deepcopy
 class DataManager:
 
     def __init__(self, results_path, file_path, num_bootstraps, 
-                num_folds, seed):
+                num_folds, seed=0):
         
         self.seed = seed
         self.__set_seed()
@@ -240,11 +240,9 @@ class DataManager:
         
         bootstraps_oob = []
         for _ in range(self.num_bootstraps):
-            bootstrap = resample(training_data, replace=True, n_samples=num_bs_samples,
-                                random_state=self.seed)
+            bootstrap = resample(training_data, replace=True, n_samples=num_bs_samples) #random_state is not being used since seed is being set globally
             oob = np.array([x for x in training_data if x not in bootstrap])
             bootstraps_oob.append((bootstrap, oob))
-            self.update_seed()  # in order to keep deterministically (but "randomly") sampling
 
         return bootstraps_oob
 
@@ -266,12 +264,10 @@ class DataManager:
         
         bootstraps_oob = []
         for _ in range(self.num_bootstraps):
-            bootstrap = resample(numeric_indexes, replace=True, n_samples=num_bs_samples,
-                                random_state=self.seed)
+            bootstrap = resample(numeric_indexes, replace=True, n_samples=num_bs_samples)
             oob = np.array([x for x in numeric_indexes if x not in bootstrap])
             bootstraps_oob.append((bootstrap, oob))
-            self.update_seed()  # in order to keep deterministically (but "randomly") sampling
-
+        
         self.current_bootstraps = bootstraps_oob
         self.__save_bootstraps_outside_cv()
         return 
@@ -283,14 +279,6 @@ class DataManager:
             file = path + "bootstrap_sampling_" + str(i+1) + ".pkl" 
             with open(file, 'wb') as f:
                 pickle.dump(bootstrap, f)
-        return
-
-    
-    def update_seed(self):
-        self.seed = np.random.randint(0, high=MAX_SEED)
-        with open(self.results_path+"seed.pkl", 'wb') as f:
-                pickle.dump(self.seed, f)
-        self.__set_seed()
         return
 
 
