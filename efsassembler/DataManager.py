@@ -213,7 +213,7 @@ class DataManager:
     def __calculate_folds(self):
 
         k = self.num_folds
-        skf = StratifiedKFold(self.seed, self.pd_df, "class", k)
+        skf = StratifiedKFold(self.pd_df, "class", k)
         self.folds = list(skf.split())
         return
 

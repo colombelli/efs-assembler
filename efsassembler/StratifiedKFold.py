@@ -1,12 +1,13 @@
 import random
-import pandas as pd
 import numpy as np
 from copy import deepcopy
 
 class StratifiedKFold:
     
-    def __init__(self, seed, dataframe, class_column_name, k, undersampling=True):
-        random.seed(seed)
+    def __init__(self, dataframe, class_column_name, k, undersampling=True, seed=None):
+        
+        if seed:
+            random.seed(seed)
         
         self.df = dataframe.reset_index(drop=True)
         self.class_coloumn_name = class_column_name
