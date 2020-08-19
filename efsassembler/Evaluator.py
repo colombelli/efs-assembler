@@ -2,7 +2,7 @@ import pandas as pd
 import pickle
 import glob
 from sklearn.svm import SVC
-#from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier as GBC
 from sklearn import metrics
 import numpy as np
 import efsassembler.kuncheva_index as ki
@@ -91,8 +91,8 @@ class Evaluator:
 
 
     def __reset_classifier(self):
-        self.classifier = SVC(gamma='auto', probability=True)
-        #self.classifier = GradientBoostingClassifier()
+        #self.classifier = SVC(gamma='auto', probability=True)
+        self.classifier = GBC()
         return
     
     def __reset_confusion_matrices(self):
@@ -196,8 +196,6 @@ class Evaluator:
         for fold_iteration in range(self.dm.num_folds):
             ranking_path = self.dm.results_path + "fold_" + str(fold_iteration+1) + "/"
             file_path = ranking_path + AGGREGATED_RANKING_FILE_NAME + str(threshold) + ".csv"
-            #ranking = self.dm.load_RDS(file)
-            #ranking = self.dm.r_to_pandas(ranking)
             ranking = self.dm.load_csv(file_path)
             final_rankings.append(ranking)
 
