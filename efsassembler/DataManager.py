@@ -22,7 +22,7 @@ class DataManager:
                 num_folds, seed=0):
         
         self.seed = seed
-        self.__set_seed()
+        self.set_seed()
 
         self.file_path = file_path
         self.num_bootstraps = num_bootstraps
@@ -44,7 +44,7 @@ class DataManager:
         self.results_path = results_path
 
 
-    def __set_seed(self):
+    def set_seed(self):
         np.random.seed(self.seed)
         robjects.r['set.seed'](self.seed)
 

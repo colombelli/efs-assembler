@@ -152,7 +152,8 @@ class Evaluator:
 
 
     def evaluate_final_rankings(self):
-        
+        self.dm.set_seed()  # reset seed internal state allowing reproducibility for the
+                            # evaluation process alone without performing feature selection 
         self.current_eval_level = 3
 
         Logger.computing_stabilities()
