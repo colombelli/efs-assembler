@@ -25,7 +25,8 @@ class ScriptsManager:
             if os.path.isfile(file_path):
                 os.remove(file_path)
             else:
-                raise(error404)
+                print(error404)
+                raise Exception(error404)
         else: 
 
             if os.path.isfile(user_scripts_path + script_name + ".py"):
@@ -33,7 +34,8 @@ class ScriptsManager:
             elif os.path.isfile(user_scripts_path + script_name + ".r"):
                 os.remove(user_scripts_path + script_name + ".r")
             else:
-                raise(error404)
+                raise Exception(error404)
+                
         return
         
 
@@ -54,10 +56,10 @@ class ScriptsManager:
             if os.path.isfile(file_path):
                 os.remove(file_path)
             else:
-                raise(error404)
+                raise Exception(error404)
         else: 
             if os.path.isfile(user_scripts_path + script_name + ".py"):
                 os.remove(user_scripts_path + script_name + ".py")
             else:
-                raise(error404)
+                raise Exception(error404)
         return
