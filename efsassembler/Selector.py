@@ -31,7 +31,7 @@ class FSelector:
                 )
         return fs_methods
 
-
+    
     def _check_for_script_file(self):
         pkgdir = sys.modules['efsassembler'].__path__[0] + "/"
         user_alg_path = pkgdir + "fs_algorithms/user_algorithms/"

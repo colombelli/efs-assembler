@@ -18,11 +18,27 @@ class StratifiedKFold:
         self.classes = self.df[self.class_coloumn_name].unique()
         self.class_counts = self.df[self.class_coloumn_name].value_counts().to_dict()
         self.minority_count = self.class_counts[min(self.class_counts)]
+        self.__update_undersampling_bool()
         
         self.class_folds = {}
         self.__init_class_folds_dict()   # fold distribution separeted in class key
         self.folds = self.__get_folds()   # a list with indexes names in another list, one per fold
         self.__shuffle_each_fold()
+
+
+    def __update_undersampling_bool(self):
+        if not self.undersampling:
+            return
+        elif self.__are_classes_count_equal():
+            self.undersampling = False  # Because this could introduce bugs in the undersampling process
+        return
+
+    
+    def __are_classes_count_equal(self):
+        for _, count in self.class_counts.items():
+            if count != self.minority_count:
+                return False
+        return True
 
 
     def __init_class_folds_dict(self):
