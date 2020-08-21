@@ -48,10 +48,16 @@ class DataManager:
         np.random.seed(self.seed)
         robjects.r['set.seed'](self.seed)
 
-        # from https://stackoverflow.com/questions/50659482/why-cant-i-get-reproducible-results-in-keras-even-though-i-set-the-random-seeds
+        # From https://stackoverflow.com/questions/50659482/why-cant-i-get-reproducible-results-in-keras-even-though-i-set-the-random-seeds
         environ['PYTHONHASHSEED']=str(self.seed)
         random.seed(self.seed)
         tf_random.set_seed(self.seed)
+        return
+
+
+    # Prevents column class being interpreted as string
+    def __convert_class_col_to_numeric(self):
+        self.pd_df["class"] = pd.to_numeric(self.pd_df["class"], downcast="integer")
         return
 
 
@@ -61,9 +67,11 @@ class DataManager:
         if self.file_path[-3:] == "rds":
             self.r_df = self.load_RDS(self.file_path)
             self.pd_df = self.r_to_pandas(self.r_df)
+            self.__convert_class_col_to_numeric()
         
         elif self.file_path[-3:] == "csv":
             self.pd_df = self.load_csv(self.file_path)
+            self.__convert_class_col_to_numeric()
             self.r_df = self.pandas_to_r(self.pd_df)
 
         else:
