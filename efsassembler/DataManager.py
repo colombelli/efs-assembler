@@ -29,7 +29,7 @@ class DataManager:
         self.num_folds = num_folds
 
        
-        self.r_df = None
+        #self.r_df = None
         self.pd_df = None
         self.__load_dataset()
         
@@ -65,14 +65,14 @@ class DataManager:
 
         Logger.loading_x_dataset(self.file_path)
         if self.file_path[-3:] == "rds":
-            self.r_df = self.load_RDS(self.file_path)
-            self.pd_df = self.r_to_pandas(self.r_df)
+            r_df = self.load_RDS(self.file_path)
+            self.pd_df = self.r_to_pandas(r_df)
             self.__convert_class_col_to_numeric()
         
         elif self.file_path[-3:] == "csv":
             self.pd_df = self.load_csv(self.file_path)
             self.__convert_class_col_to_numeric()
-            self.r_df = self.pandas_to_r(self.pd_df)
+            #self.r_df = self.pandas_to_r(self.pd_df)
 
         else:
             raise("Dataset format not accepted. Should be a .rds or .csv file.")
@@ -201,12 +201,12 @@ class DataManager:
     
     def encode_main_dm_df(self):
         self.pd_df = self.encode_df(self.pd_df)
-        self.r_df = self.pandas_to_r(self.pd_df)
+        #self.r_df = self.pandas_to_r(self.pd_df)
         return
     
     def decode_main_dm_df(self):
         self.pd_df = self.decode_df(self.pd_df, False)
-        self.r_df = self.pandas_to_r(self.pd_df)
+        #self.r_df = self.pandas_to_r(self.pd_df)
         return
 
 
