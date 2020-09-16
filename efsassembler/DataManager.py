@@ -266,9 +266,9 @@ class DataManager:
         return
 
     
-    def update_bootstraps_outside_cross_validation(self):
+    def update_bootstraps_outside_cross_validation(self, df, pkl_path):
         
-        num_bs_samples = len(self.pd_df)
+        num_bs_samples = len(df)
         numeric_indexes = list(range(num_bs_samples))
         
         bootstraps_oob = []
@@ -278,14 +278,13 @@ class DataManager:
             bootstraps_oob.append((bootstrap, oob))
         
         self.current_bootstraps = bootstraps_oob
-        self.__save_bootstraps_outside_cv()
+        self.__save_bootstraps_outside_cv(pkl_path)
         return 
 
     
-    def __save_bootstraps_outside_cv(self):
-        path = self.results_path + SELECTION_PATH
+    def __save_bootstraps_outside_cv(self, pkl_path):
         for i, bootstrap in enumerate(self.current_bootstraps):
-            file = path + "bootstrap_sampling_" + str(i+1) + ".pkl" 
+            file = pkl_path + "bootstrap_sampling_" + str(i+1) + ".pkl" 
             with open(file, 'wb') as f:
                 pickle.dump(bootstrap, f)
         return
