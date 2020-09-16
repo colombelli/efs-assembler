@@ -22,14 +22,14 @@ class FinalSelection:
     def start(self):
         Logger.encoding_dataset()
         self.dm.encode_main_dm_df()
-        self.experiment.select_features()
-        self.dm.create_selection_dirs()
+        self.dm.compute_data_folds_final_selection()
+        self.create_selection_dirs()
         self.experiment.select_features(self.balanced)
         self.aggregate_rankings()
         return
 
 
-    def create_selection_dir(self):
+    def create_selection_dirs(self):
         if self.balanced:
             self.dm.create_balanced_selection_dirs()
         return

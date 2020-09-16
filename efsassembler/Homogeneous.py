@@ -24,7 +24,7 @@ class Homogeneous:
         for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
             
             ranking_path=None
-            if i:
+            if experiment_selection:
                 Logger.bootstrap_fold_iteration(j+1, i+1)
                 ranking_path = self.dm.get_output_path(i, j)
             
@@ -43,7 +43,7 @@ class Homogeneous:
             self.current_threshold = th
             aggregation = self.aggregator.aggregate(self)
             
-        self.dm.save_encoded_ranking(aggregation, file_path+str(th))   
+            self.dm.save_encoded_ranking(aggregation, file_path+str(th))   
         return
 
     

@@ -320,7 +320,7 @@ class DataManager:
     
         label_counts = self.pd_df['class'].value_counts()
         majority_class = label_counts.idxmax()
-        minority_class = label_counts.idxmin()
+        minority_class = 0 if majority_class else 1
         majority_indexes = self.pd_df.loc[self.pd_df["class"]==majority_class].index.tolist()
         minority_indexes = self.pd_df.loc[self.pd_df["class"]==minority_class].index.tolist()
         minority_count = label_counts.min()
@@ -349,7 +349,7 @@ class DataManager:
         file = self.results_path + SELECTION_PATH + "folds.pkl"
         with open(file, 'wb') as f:
             pickle.dump(folds_final_selection, f)
-
+        
         self.folds_final_selection = folds_final_selection
         return
 
