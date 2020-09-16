@@ -10,6 +10,7 @@ from efsassembler.Homogeneous import Homogeneous
 from efsassembler.SingleFS import SingleFS
 from efsassembler.Evaluator import Evaluator
 from efsassembler.InformationManager import InformationManager
+from efsassembler.FinalSelection import FinalSelection
 
 import rpy2.robjects.packages as rpackages
 
@@ -155,9 +156,8 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
         
-        Logger.encoding_dataset()
-        dm.encode_main_dm_df()
-        ensemble.select_features()
+        final_selection = FinalSelection(ensemble, dm, True)
+        final_selection.start()
 
         Logger.end_experiment_message()
         return
@@ -193,9 +193,8 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        Logger.encoding_dataset()
-        dm.encode_main_dm_df()
-        ensemble.select_features()
+        final_selection = FinalSelection(ensemble, dm, True)
+        final_selection.start()
 
         Logger.end_experiment_message()
         return
@@ -231,9 +230,8 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        Logger.encoding_dataset()
-        dm.encode_main_dm_df()
-        ensemble.select_features()
+        final_selection = FinalSelection(ensemble, dm, True)
+        final_selection.start()
 
         Logger.end_experiment_message()
         return
@@ -269,9 +267,8 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        Logger.encoding_dataset()
-        dm.encode_main_dm_df()
-        feature_selector.select_features()
+        final_selection = FinalSelection(feature_selector, dm, True)
+        final_selection.start()
 
         Logger.end_experiment_message()
         return

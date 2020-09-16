@@ -1,3 +1,5 @@
+from efsassembler.Logger import Logger
+
 class FinalSelection:
 
     '''
@@ -15,10 +17,16 @@ class FinalSelection:
         self.balanced = balanced
         self.experiment = experiment
         self.dm = datamanager
-        
+
+
+    def start(self):
+        Logger.encoding_dataset()
+        self.dm.encode_main_dm_df()
+        self.experiment.select_features()
         self.dm.create_selection_dirs()
         self.experiment.select_features(self.balanced)
         self.aggregate_rankings()
+        return
 
 
     def create_selection_dir(self):
