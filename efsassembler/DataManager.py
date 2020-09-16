@@ -70,7 +70,7 @@ class DataManager:
             self.__convert_class_col_to_numeric()
         
         elif self.file_path[-3:] == "csv":
-            self.pd_df = self.load_csv(self.file_path)
+            self.pd_df = self.'load_csv'(self.file_path)
             self.__convert_class_col_to_numeric()
             #self.r_df = self.pandas_to_r(self.pd_df)
 
@@ -311,7 +311,35 @@ class DataManager:
         return (training_data, testing_data)
 
 
-    
     def set_bs_rankings(self, bs_rankings):
         self.bs_rankings = bs_rankings
         return
+
+    
+    def get_data_folds_final_selection():
+    
+        label_counts = self.pd_df['class'].value_counts()
+        majority_class = label_counts.idxmax()
+        minority_class = label_counts.idxmin()
+        majority_indexes = self.pd_df.loc[self.pd_df["class"]==majority_class].index.tolist()
+        minority_indexes = self.pd_df.loc[self.pd_df["class"]==minority_class].index.tolist()
+        minority_count = label_counts.min()
+        
+        num_folds = round(label_counts[majority_class] / label_counts[minority_class])
+        
+        folds_final_selection = []
+        prev_index = 0
+        for _ in range(num_folds):
+            new_fold = deepcopy(minority_indexes)
+            limit_index = prev_index + minority_count
+            
+            if limit_index > len(majority_indexes):
+                new_fold += majority_indexes[prev_index:]
+            else:
+                new_fold += majority_indexes[prev_index:limit_index]
+            
+            random.shuffle(new_fold)
+            folds_final_selection.append(new_fold)
+            prev_index = limit_index
+        
+        return folds_final_selection
