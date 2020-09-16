@@ -43,6 +43,7 @@ class DataManager:
 
         self.results_path = results_path
 
+        self.folds_final_selection = None
 
     def set_seed(self):
         np.random.seed(self.seed)
@@ -70,7 +71,7 @@ class DataManager:
             self.__convert_class_col_to_numeric()
         
         elif self.file_path[-3:] == "csv":
-            self.pd_df = self.'load_csv'(self.file_path)
+            self.pd_df = self.load_csv(self.file_path)
             self.__convert_class_col_to_numeric()
             #self.r_df = self.pandas_to_r(self.pd_df)
 
@@ -316,7 +317,7 @@ class DataManager:
         return
 
     
-    def get_data_folds_final_selection():
+    def compute_data_folds_final_selection(self):
     
         label_counts = self.pd_df['class'].value_counts()
         majority_class = label_counts.idxmax()
@@ -342,4 +343,19 @@ class DataManager:
             folds_final_selection.append(new_fold)
             prev_index = limit_index
         
-        return folds_final_selection
+        if limit_index < len(majority_indexes): # Then the 'round' floored and there are more samples
+            folds_final_selection[-1].append(majority_indexes[limit_index:])
+            random.shuffle(folds_final_selection[-1])
+
+        file = self.results_path + SELECTION_PATH + "folds.pkl"
+        with open(file, 'wb') as f:
+            pickle.dump(folds_final_selection, f)
+
+        self.folds_final_selection = folds_final_selection
+        return
+
+
+    def create_balanced_selection_dirs(self):
+        for i in range(len(self.folds_final_selection)):
+            mkdir(self.results_path+SELECTION_PATH+str(i))
+        return
