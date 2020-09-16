@@ -60,14 +60,8 @@ class Heterogeneous:
         return
 
 
-    # Select the features looking at the whole dataset (no cross validation) or
-    # at multiple folds of the data considering, for each fold, all the samples 
-    # from the minority class and an equivalent amount for the majority class 
-    # (except, possibly, for the last fold)
     def select_features(self, balanced=True):
-
         if balanced:
-            self.dm.create_balanced_selection_dirs()
             self.select_features_balanced()
         else:
             self.select_features_whole_dataset()
@@ -88,6 +82,4 @@ class Heterogeneous:
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
             df = self.dm.pd_df.loc[fold]
             self.het_feature_selection(df, output_path)
-        
-        #TODO: LOAD THRESHOLDED RANKINGS AND AGGREGATE IN A FINAL RANKING FOR EACH THRESHOLD IN EACH FOLD
         return
