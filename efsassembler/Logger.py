@@ -159,3 +159,9 @@ class Logger:
     def decoding_dataset(self):
         Logger.handler.info("Decoding dataset")
         return
+
+    @classmethod
+    def final_balanced_selection_iter(self, i, total):
+        log = "Final selection process | " + str(i) + "/" + str(total)
+        Logger.handler.info(log)
+        return

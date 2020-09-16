@@ -82,6 +82,12 @@ class Heterogeneous:
 
 
     def select_features_balanced(self):
-
-        for fold in self.dm.folds_final_selection:
-            print('')
+        total_folds = len(self.dm.folds_final_selection)
+        for i, fold in enumerate(self.dm.folds_final_selection):
+            Logger.final_balanced_selection_iter(i, total_folds)
+            output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
+            df = self.dm.pd_df.loc[fold]
+            self.het_feature_selection(df, output_path)
+        
+        #TODO: LOAD THRESHOLDED RANKINGS AND AGGREGATE IN A FINAL RANKING FOR EACH THRESHOLD IN EACH FOLD
+        return
