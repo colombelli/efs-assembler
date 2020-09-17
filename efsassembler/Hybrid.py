@@ -231,7 +231,7 @@ class Hybrid:
         if balanced:
             total_folds = len(self.dm.folds_final_selection)
             for i, fold in enumerate(self.dm.folds_final_selection):
-                Logger.final_balanced_selection_iter(i, total_folds)
+                Logger.final_balanced_selection_iter(i, total_folds-1)
                 self.dm.current_fold_iteration = i
                 df = self.dm.pd_df.loc[fold]
                 output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'

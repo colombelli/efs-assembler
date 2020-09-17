@@ -78,7 +78,7 @@ class Heterogeneous:
     def select_features_balanced(self):
         total_folds = len(self.dm.folds_final_selection)
         for i, fold in enumerate(self.dm.folds_final_selection):
-            Logger.final_balanced_selection_iter(i, total_folds)
+            Logger.final_balanced_selection_iter(i, total_folds-1)
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
             df = self.dm.pd_df.loc[fold]
             self.het_feature_selection(df, output_path, in_experiment=False)
