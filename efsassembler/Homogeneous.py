@@ -19,12 +19,14 @@ class Homogeneous:
         self.current_threshold = None
 
 
-    def hom_feature_selection(self, output_path, i=None, experiment_selection=True):
+    def hom_feature_selection(self, output_path, i=None, in_experiment=True):
+        
+        ranking_path=None
         rankings = []
+
         for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
             
-            ranking_path=None
-            if experiment_selection:
+            if in_experiment:
                 Logger.bootstrap_fold_iteration(j+1, i+1)
                 ranking_path = self.dm.get_output_path(i, j)
             
@@ -32,7 +34,7 @@ class Homogeneous:
                 Logger.bootstrap_iteration(j+1)
                 
             bootstrap_data = self.dm.pd_df.iloc[bootstrap]
-            rankings.append(self.fs_method.select(bootstrap_data, ranking_path, save_ranking=experiment_selection))
+            rankings.append(self.fs_method.select(bootstrap_data, ranking_path, save_ranking=in_experiment))
 
         self.__set_rankings_to_aggregate(rankings)
         
@@ -60,7 +62,7 @@ class Homogeneous:
             self.dm.update_bootstraps()
             output_path = self.dm.get_output_path(fold_iteration=i)
 
-            self.hom_feature_selection(output_path, i=i, experiment_selection=True)
+            self.hom_feature_selection(output_path, i=i, in_experiment=True)
         return
 
 
@@ -76,7 +78,7 @@ class Homogeneous:
         Logger.whole_dataset_selection()
         output_path = self.dm.results_path + SELECTION_PATH
         self.dm.update_bootstraps_outside_cross_validation(self.dm.pd_df, output_path)
-        self.hom_feature_selection(output_path, experiment_selection=False)
+        self.hom_feature_selection(output_path, in_experiment=False)
         return
 
 
@@ -87,5 +89,5 @@ class Homogeneous:
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
             df = self.dm.pd_df.loc[fold]
             self.dm.update_bootstraps_outside_cross_validation(df, output_path)
-            self.hom_feature_selection(output_path, experiment_selection=False)
+            self.hom_feature_selection(output_path, in_experiment=False)
         return

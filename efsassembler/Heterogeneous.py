@@ -18,12 +18,12 @@ class Heterogeneous:
         self.current_threshold = None
 
 
-    def het_feature_selection(self, df, output_path, experiment_selection=True):
+    def het_feature_selection(self, df, output_path, in_experiment=True):
         
         rankings = []
         for fs_method in self.fs_methods:  
             rankings.append(
-                fs_method.select(df, output_path, save_ranking=experiment_selection)
+                fs_method.select(df, output_path, save_ranking=in_experiment)
             )
         
         self.__set_rankings_to_aggregate(rankings)
@@ -55,7 +55,7 @@ class Heterogeneous:
             training_indexes, _ = self.dm.get_fold_data()
             training_data = self.dm.pd_df.iloc[training_indexes]
             
-            self.het_feature_selection(training_data, output_path, experiment_selection=True)
+            self.het_feature_selection(training_data, output_path, in_experiment=True)
 
         return
 
@@ -71,7 +71,7 @@ class Heterogeneous:
     def select_features_whole_dataset(self):
         Logger.whole_dataset_selection()
         output_path = self.dm.results_path + SELECTION_PATH
-        self.het_feature_selection(self.dm.pd_df, output_path, experiment_selection=False)
+        self.het_feature_selection(self.dm.pd_df, output_path, in_experiment=False)
         return
 
 
@@ -81,5 +81,5 @@ class Heterogeneous:
             Logger.final_balanced_selection_iter(i, total_folds)
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
             df = self.dm.pd_df.loc[fold]
-            self.het_feature_selection(df, output_path, experiment_selection=False)
+            self.het_feature_selection(df, output_path, in_experiment=False)
         return

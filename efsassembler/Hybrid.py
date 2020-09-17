@@ -20,15 +20,12 @@ class Hybrid:
         self.snd_aggregator = Aggregator(second_aggregator)
 
         if self.fst_aggregator.heavy or self.snd_aggregator.heavy:
-            self.select_features_experiment = self.select_features_heavy_experiment
-            self.select_features = self.select_features_heavy
+            self.hyb_feature_selection = self.hyb_feature_selection_heavy
         else:
-            self.select_features_experiment = self.select_features_light_experiment
-            self.select_features = self.select_features_light
+            self.hyb_feature_selection = self.hyb_feature_selection_light
 
         self.rankings_to_aggregate = None
             
-
 
         
     def __generate_fselectors_object(self, methods):
@@ -47,39 +44,40 @@ class Hybrid:
         return fs_methods
 
 
+#################################################################################################################################
+##################################################### LIGHT SELECTION ###########################################################
+#################################################################################################################################
 
-    def select_features_light_experiment(self):
-    
-        for i in range(self.dm.num_folds):
-            
-            Logger.fold_iteration(i+1)
-            self.dm.current_fold_iteration = i
-            self.dm.update_bootstraps()
-             
-            # initializes snd_layer_ranking
-            snd_layer_rankings = {}
-            for th in self.thresholds:
-                snd_layer_rankings[th] = []
-
-            for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-                Logger.bootstrap_fold_iteration(j+1, i+1)
-                output_path = self.dm.get_output_path(i, j)
-                bootstrap_data = self.dm.pd_df.iloc[bootstrap]
-
+    def hyb_feature_selection_light(self, in_experiment=True):
         
-                fst_layer_rankings = []
-                for fs_method in self.fs_methods:  
-                    fst_layer_rankings.append(
-                        fs_method.select(bootstrap_data, output_path)
-                    )
-                
-                self.__set_rankings_to_aggregate(fst_layer_rankings)
-                self.__aggregate_light_fst_layer(j, snd_layer_rankings)
+        ranking_path = None
+        snd_layer_rankings = {}
+        i = self.dm.current_fold_iteration
+
+        for th in self.thresholds:
+            snd_layer_rankings[th] = []
+
+        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
+
+            if in_experiment:
+                Logger.bootstrap_fold_iteration(j+1, i+1)
+                ranking_path = self.dm.get_output_path(i, j)
+
+            else:
+                Logger.bootstrap_iteration(j+1)
+
+            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+            fst_layer_rankings = []
+            for fs_method in self.fs_methods:   
+                fst_layer_rankings.append(
+                    fs_method.select(bootstrap_data, ranking_path, save_ranking=in_experiment)
+                )
             
-
-            self.__aggregate_light_snd_layer(snd_layer_rankings)
-
-        return
+            self.__set_rankings_to_aggregate(fst_layer_rankings)
+            self.__aggregate_light_fst_layer(j, snd_layer_rankings, in_experiment)
+        
+        self.__aggregate_light_snd_layer(snd_layer_rankings, in_experiment)
+        return 
 
 
     def __aggregate_light_fst_layer(self, bootstrap_num, snd_layer_rankings, in_experiment=True):
@@ -104,13 +102,16 @@ class Hybrid:
 
     
     def __aggregate_light_snd_layer(self, snd_layer_rankings, in_experiment=True):
-        fold_iteration = self.dm.current_fold_iteration
+        i = self.dm.current_fold_iteration
 
         if in_experiment:
-            output_path = self.dm.get_output_path(fold_iteration=fold_iteration)
+            output_path = self.dm.get_output_path(fold_iteration=i)
             file_path = output_path + AGGREGATED_RANKING_FILE_NAME
 
-        else:
+        elif i != None: # Final Selection balanced
+            file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/" + AGGREGATED_RANKING_FILE_NAME
+        
+        else:  # Final Selection on the whole dataset
             file_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
 
         for th in self.thresholds:
@@ -124,38 +125,48 @@ class Hybrid:
         return
 
 
-    def select_features_heavy_experiment(self):
-    
-        for i in range(self.dm.num_folds):
+#################################################################################################################################
+#################################################################################################################################
+#################################################################################################################################
+
+
+
+#################################################################################################################################
+##################################################### HEAVY SELECTION ###########################################################
+#################################################################################################################################
+
+    def hyb_feature_selection_heavy(self, in_experiment=True):
+
+        ranking_path = None
+        bs_rankings = {}
+        i = self.dm.current_fold_iteration
+
+        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
             
-            Logger.fold_iteration(i+1)
-            self.dm.current_fold_iteration = i
-            self.dm.update_bootstraps()
-
-            bs_rankings = {}
-            for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
+            if in_experiment:
                 Logger.bootstrap_fold_iteration(j+1, i+1)
-                output_path = self.dm.get_output_path(i, j)
-                bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+                ranking_path = self.dm.get_output_path(i, j)
 
-        
-                fst_layer_rankings = []
-                for fs_method in self.fs_methods: 
-                    fst_layer_rankings.append(
-                        fs_method.select(bootstrap_data, output_path)
-                    )
-                
-                bs_rankings[j] = fst_layer_rankings
-            self.dm.set_bs_rankings(bs_rankings)
+            else: 
+                Logger.bootstrap_iteration(j+1)
 
+            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+            fst_layer_rankings = []
+            for fs_method in self.fs_methods: 
+                fst_layer_rankings.append(
+                    fs_method.select(bootstrap_data, ranking_path, in_experiment)
+                )
+            
+            bs_rankings[j] = fst_layer_rankings
+        self.dm.set_bs_rankings(bs_rankings)
 
-            self.__aggregate_heavy() 
+        self.__aggregate_heavy(in_experiment) 
         return
 
 
     def __aggregate_heavy(self, in_experiment=True):
 
-        fold_iteration = self.dm.current_fold_iteration
+        i = self.dm.current_fold_iteration
         for th in self.thresholds:
             Logger.for_threshold(th)
             Logger.aggregating_n_level_rankings(1)
@@ -168,7 +179,7 @@ class Hybrid:
 
             if in_experiment: 
                 for bs_num, fs_aggregation in enumerate(fs_aggregations):
-                    output_path = self.dm.get_output_path(fold_iteration, bs_num)
+                    output_path = self.dm.get_output_path(i, bs_num)
                     file_path = output_path + AGGREGATED_RANKING_FILE_NAME + str(th)
                     self.dm.save_encoded_ranking(fs_aggregation, file_path)
             
@@ -176,8 +187,13 @@ class Hybrid:
             Logger.aggregating_n_level_rankings(2)
 
             if in_experiment:
-                file_path = self.dm.get_output_path(fold_iteration=fold_iteration) + \
+                file_path = self.dm.get_output_path(fold_iteration=i) + \
                                 AGGREGATED_RANKING_FILE_NAME + str(th) 
+           
+            elif i != None:
+                file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/" + \
+                        AGGREGATED_RANKING_FILE_NAME + str(th) 
+
             else:
                 file_path = self.dm.results_path + SELECTION_PATH + \
                         AGGREGATED_RANKING_FILE_NAME + str(th) 
@@ -200,61 +216,43 @@ class Hybrid:
         return fs_aggregations
 
 
-
     def __set_rankings_to_aggregate(self, rankings):
         self.rankings_to_aggregate = rankings
         return
 
-    
-    def select_features_light(self):
-    
-        Logger.whole_dataset_selection()
-        self.dm.update_bootstraps_outside_cross_validation()
-            
-        # initializes snd_layer_ranking
-        snd_layer_rankings = {}
-        for th in self.thresholds:
-            snd_layer_rankings[th] = []
 
-        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-            Logger.bootstrap_iteration(j+1)
-            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+#################################################################################################################################
+#################################################################################################################################
+#################################################################################################################################
 
-    
-            fst_layer_rankings = []
-            for fs_method in self.fs_methods:   
-                fst_layer_rankings.append(
-                    fs_method.select(bootstrap_data, save_ranking=False)
-                )
-            
-            self.__set_rankings_to_aggregate(fst_layer_rankings)
-            self.__aggregate_light_fst_layer(j, snd_layer_rankings, in_experiment=False)
-        
 
-        self.__aggregate_light_snd_layer(snd_layer_rankings, in_experiment=False)
+    def select_features(self, balanced=True):
+
+        if balanced:
+            total_folds = len(self.dm.folds_final_selection)
+            for i, fold in enumerate(self.dm.folds_final_selection):
+                Logger.final_balanced_selection_iter(i, total_folds)
+                self.dm.current_fold_iteration = i
+                df = self.dm.pd_df.loc[fold]
+                output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
+                self.dm.update_bootstraps_outside_cross_validation(df, output_path)
+                self.hyb_feature_selection(in_experiment=False)
+        else:
+            Logger.whole_dataset_selection()
+            self.dm.current_fold_iteration = None
+            output_path = self.dm.results_path + SELECTION_PATH
+            self.dm.update_bootstraps_outside_cross_validation(self.dm.pd_df, output_path)
+            self.hyb_feature_selection(in_experiment=False)
         return
 
-    
-    def select_features_heavy(self):
 
-        Logger.whole_dataset_selection()
-        self.dm.update_bootstraps_outside_cross_validation()
-            
-        bs_rankings = {}
-        for j, (bootstrap, _) in enumerate(self.dm.current_bootstraps):
-            Logger.bootstrap_iteration(j+1)
-            bootstrap_data = self.dm.pd_df.iloc[bootstrap]
+    def select_features_experiment(self):
     
-            fst_layer_rankings = []
-            for fs_method in self.fs_methods:   
-                fst_layer_rankings.append(
-                    fs_method.select(bootstrap_data, save_ranking=False)
-                )
-            
-            bs_rankings[j] = fst_layer_rankings
-        self.dm.set_bs_rankings(bs_rankings)
-
-        self.__aggregate_heavy(in_experiment=False) 
+        for i in range(self.dm.num_folds):
+            Logger.fold_iteration(i+1)
+            self.dm.current_fold_iteration = i
+            self.dm.update_bootstraps()
+            self.hyb_feature_selection(in_experiment=True)
         return
 
 
