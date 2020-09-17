@@ -14,6 +14,9 @@ class SingleFS:
         self.thresholds = thresholds
 
 
+    # In order to reuse Evaluator class, we need an AGGREGATED_RANKING_FILE_NAME+th
+    # accessible inside each fold iteration folder, so we simply resave the only
+    # ranking we have with the appropriate name
 
     def select_features_experiment(self):
 
@@ -28,9 +31,6 @@ class SingleFS:
 
             ranking = self.fs_method.select(training_data, output_path)
 
-            # in order to reuse Evaluator class, we need an AGGREGATED_RANKING_FILE_NAME+th
-            # accessible inside each fold iteration folder, so we simply resave the only
-            # ranking we have with the appropriate name
             output_path = self.dm.get_output_path(fold_iteration=i)
             file_path = output_path + AGGREGATED_RANKING_FILE_NAME
             for th in self.thresholds:
@@ -40,10 +40,24 @@ class SingleFS:
 
 
 
-    def select_features(self):
+    def select_features(self, balanced=True):
 
-        Logger.whole_dataset_selection()
-        output_path = self.dm.results_path + SELECTION_PATH
+        if balanced:
+            total_folds = len(self.dm.folds_final_selection)
+            for i, fold in enumerate(self.dm.folds_final_selection):
+                Logger.final_balanced_selection_iter(i, total_folds-1)
+                df = self.dm.pd_df.loc[fold]
+                ranking = self.fs_method.select(df, save_ranking=False)
+                output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
+                file_path = output_path + AGGREGATED_RANKING_FILE_NAME + '0'
+                self.dm.save_encoded_ranking(ranking, file_path)
 
-        self.fs_method.select(self.dm.pd_df, output_path)
+        else:
+            Logger.whole_dataset_selection()
+            output_path = self.dm.results_path + SELECTION_PATH
+            ranking = self.fs_method.select(self.dm.pd_df, save_ranking=False)
+            output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
+            file_path = output_path + AGGREGATED_RANKING_FILE_NAME + '0'
+            self.dm.save_encoded_ranking(ranking, file_path)
+             
         return
