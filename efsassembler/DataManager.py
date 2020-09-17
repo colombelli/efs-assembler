@@ -42,8 +42,8 @@ class DataManager:
                                     # any of the aggregation methods
 
         self.results_path = results_path
-
         self.folds_final_selection = None
+
 
     def set_seed(self):
         np.random.seed(self.seed)

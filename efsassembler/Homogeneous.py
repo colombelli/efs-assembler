@@ -17,10 +17,19 @@ class Homogeneous:
 
         self.thresholds = thresholds
         self.current_threshold = None
+        self.final_rankings_dict = {}
+        self.__init_final_rankings_dict()
 
 
-    def hom_feature_selection(self, output_path, i=None, in_experiment=True):
+    def __init_final_rankings_dict(self):
+        for th in self.thresholds:
+            self.final_rankings_dict[th] = []
+        return
+
+
+    def hom_feature_selection(self, output_path, in_experiment=True):
         
+        i = self.dm.current_fold_iteration
         ranking_path=None
         rankings = []
 
@@ -44,8 +53,10 @@ class Homogeneous:
             Logger.for_threshold(th)
             self.current_threshold = th
             aggregation = self.aggregator.aggregate(self)
-            
-            self.dm.save_encoded_ranking(aggregation, file_path+str(th))   
+            self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
+
+            if (not in_experiment) and (i != None):
+                self.final_rankings_dict[th].append(aggregation)
         return
 
     
@@ -62,7 +73,7 @@ class Homogeneous:
             self.dm.update_bootstraps()
             output_path = self.dm.get_output_path(fold_iteration=i)
 
-            self.hom_feature_selection(output_path, i=i, in_experiment=True)
+            self.hom_feature_selection(output_path, in_experiment=True)
         return
 
 
@@ -76,6 +87,7 @@ class Homogeneous:
 
     def select_features_whole_dataset(self):
         Logger.whole_dataset_selection()
+        self.dm.current_fold_iteration = None
         output_path = self.dm.results_path + SELECTION_PATH
         self.dm.update_bootstraps_outside_cross_validation(self.dm.pd_df, output_path)
         self.hom_feature_selection(output_path, in_experiment=False)
@@ -86,6 +98,7 @@ class Homogeneous:
         total_folds = len(self.dm.folds_final_selection)
         for i, fold in enumerate(self.dm.folds_final_selection):
             Logger.final_balanced_selection_iter(i, total_folds-1)
+            self.dm.current_fold_iteration = i
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
             df = self.dm.pd_df.loc[fold]
             self.dm.update_bootstraps_outside_cross_validation(df, output_path)

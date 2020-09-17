@@ -16,6 +16,14 @@ class Heterogeneous:
 
         self.thresholds = thresholds
         self.current_threshold = None
+        self.final_rankings_dict = {}
+        self.__init_final_rankings_dict()
+
+
+    def __init_final_rankings_dict(self):
+        for th in self.thresholds:
+            self.final_rankings_dict[th] = []
+        return
 
 
     def het_feature_selection(self, df, output_path, in_experiment=True):
@@ -33,8 +41,11 @@ class Heterogeneous:
             Logger.for_threshold(th)
             self.current_threshold = th
             aggregation = self.aggregator.aggregate(self)
-            
             self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
+
+            if not in_experiment:
+                self.final_rankings_dict[th].append(aggregation)
+
         return
 
 

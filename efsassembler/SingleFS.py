@@ -12,6 +12,14 @@ class SingleFS:
         self.dm = data_manager
         self.fs_method = FSelector.generate_fselectors_object(fs_method)[0]
         self.thresholds = thresholds
+        self.final_rankings_dict = {}
+        self.__init_final_rankings_dict()
+
+
+    def __init_final_rankings_dict(self):
+        for th in self.thresholds:
+            self.final_rankings_dict[th] = []
+        return
 
 
     # In order to reuse Evaluator class, we need an AGGREGATED_RANKING_FILE_NAME+th
@@ -49,15 +57,20 @@ class SingleFS:
                 df = self.dm.pd_df.loc[fold]
                 ranking = self.fs_method.select(df, save_ranking=False)
                 output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
-                file_path = output_path + AGGREGATED_RANKING_FILE_NAME + '0'
-                self.dm.save_encoded_ranking(ranking, file_path)
+                file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+                
+                for th in self.thresholds:
+                    self.dm.save_encoded_ranking(ranking, file_path+str(th))
+                    self.final_rankings_dict[th].append(ranking)
 
         else:
             Logger.whole_dataset_selection()
             output_path = self.dm.results_path + SELECTION_PATH
             ranking = self.fs_method.select(self.dm.pd_df, save_ranking=False)
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
-            file_path = output_path + AGGREGATED_RANKING_FILE_NAME + '0'
-            self.dm.save_encoded_ranking(ranking, file_path)
+            file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+            
+            for th in self.thresholds:
+                    self.dm.save_encoded_ranking(ranking, file_path+str(th))
              
         return

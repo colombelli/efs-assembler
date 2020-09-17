@@ -25,6 +25,8 @@ class Hybrid:
             self.hyb_feature_selection = self.hyb_feature_selection_light
 
         self.rankings_to_aggregate = None
+        self.final_rankings_dict = {}
+        self.__init_final_rankings_dict()
             
 
         
@@ -40,8 +42,13 @@ class Hybrid:
                 fs_methods.append(
                     RSelector(rds_name, script)
                 )
-
         return fs_methods
+
+
+    def __init_final_rankings_dict(self):
+        for th in self.thresholds:
+            self.final_rankings_dict[th] = []
+        return
 
 
 #################################################################################################################################
@@ -122,6 +129,9 @@ class Hybrid:
             fs_aggregation = self.snd_aggregator.aggregate(self)
             self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
 
+            if (not in_experiment) and (i != None):
+                self.final_rankings_dict[th].append(fs_aggregation)
+
         return
 
 
@@ -201,6 +211,9 @@ class Hybrid:
             self.__set_rankings_to_aggregate(snd_layer_rankings)
             final_ranking = self.snd_aggregator.aggregate(self)
             self.dm.save_encoded_ranking(final_ranking, file_path)
+
+            if (not in_experiment) and (i != None):
+                self.final_rankings_dict[th].append(final_ranking)
         return
 
 
