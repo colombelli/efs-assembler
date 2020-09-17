@@ -1,5 +1,6 @@
 from efsassembler.Logger import Logger
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME
+from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
+from efsassembler.Aggregator import Aggregator
 
 class FinalSelection:
 
@@ -18,7 +19,6 @@ class FinalSelection:
         self.balanced = balanced
         self.experiment = experiment
         self.dm = datamanager
-        self.rankings_dict = None
 
 
     def start(self):
@@ -26,7 +26,7 @@ class FinalSelection:
         self.dm.encode_main_dm_df()
         self.dm.compute_data_folds_final_selection()
         self.create_selection_dirs()
-        self.rankings_dict = self.experiment.select_features(self.balanced)
+        self.experiment.select_features(self.balanced)
         self.aggregate_rankings()
         return
 
@@ -38,23 +38,12 @@ class FinalSelection:
 
 
     def aggregate_rankings(self):
+        aggregator = Aggregator('borda')
+        output_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
+        for th in self.experiment.thresholds:
+            self.experiment.rankings_to_aggregate = self.experiment.final_rankings_dict[th]
+            aggregation = aggregator.aggregate(self.experiment)
+            file_name = output_path + str(th)
+            self.dm.save_encoded_ranking(aggregation, file_name)
 
-        #self.load_rankings()
-        #aggregate them for every 
         return
-
-    '''
-    def load_rankings(self):
-
-        root_path = self.dm.results_path + SELECTION_PATH
-        for i in range(len(self.dm.folds_final_selection))
-            for th in self.experiment.thresholds:
-                ranking_path = root_path + str(i) + '/' + \
-                    AGGREGATED_RANKING_FILE_NAME + str(th)
-                ranking = self.dm.load_csv(ranking_path)
-                try:
-                    self.rankings_dict[th].append(ranking)
-                except:
-                    self.rankings_dict[th] = [ranking]
-        return
-    '''
