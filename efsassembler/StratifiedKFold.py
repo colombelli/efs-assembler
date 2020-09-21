@@ -17,7 +17,7 @@ class StratifiedKFold:
         
         self.classes = self.df[self.class_coloumn_name].unique()
         self.class_counts = self.df[self.class_coloumn_name].value_counts().to_dict()
-        self.minority_count = self.class_counts[min(self.class_counts)]
+        self.minority_count = self.class_counts[min(self.class_counts, key=self.class_counts.get)]
         self.__update_undersampling_bool()
         
         self.class_folds = {}
@@ -131,7 +131,7 @@ class StratifiedKFold:
 
     def __random_undersample_fold(self, fold_idx):
         
-        minority_class = min(self.class_counts)
+        minority_class = min(self.class_counts, key=self.class_counts.get)
         minority_class_fold_count = len(self.class_folds[minority_class][fold_idx])
         
         samples_to_remove = []
