@@ -326,7 +326,7 @@ class DataManager:
         minority_count = label_counts.min()
         
         num_folds = round(label_counts[majority_class] / label_counts[minority_class])
-        
+
         folds_final_selection = []
         prev_index = 0
         for _ in range(num_folds):
@@ -341,9 +341,10 @@ class DataManager:
             random.shuffle(new_fold)
             folds_final_selection.append(new_fold)
             prev_index = limit_index
-        
+
+
         if limit_index < len(majority_indexes): # Then the 'round' floored and there are more samples
-            folds_final_selection[-1].append(majority_indexes[limit_index:])
+            folds_final_selection[-1] += majority_indexes[limit_index:]
             random.shuffle(folds_final_selection[-1])
 
         file = self.results_path + SELECTION_PATH + "folds.pkl"
