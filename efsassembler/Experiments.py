@@ -53,9 +53,10 @@ class Experiments:
 
     def __init__(self, experiments, results_path, final_selection_balanced=True):
 
-        rpackages.quiet_require('FSelectorRcpp')
+        
         self.experiments = experiments
         self.final_selection_balanced = final_selection_balanced
+        self._should_load_FSelector()
 
         if results_path[-1] != "/":
             self.results_path = results_path + "/"
@@ -68,6 +69,15 @@ class Experiments:
         sufix = "_E" + str(count+i+1) + "/"
         rad = exp["type"] + "_" + ds_path.split('/')[-1].split('.')[0]
         return rad+sufix
+
+
+    def _should_load_FSelector(self):
+        for experiment in self.experiments:
+            for selector in experiment["selectors"]:
+                if selector[1] == 'r':
+                    rpackages.quiet_require('FSelectorRcpp')
+                    return
+        return
 
 
 

@@ -13,11 +13,11 @@ class FinalSelection:
 
     # balanced: if True, uses the folding fashion for balanced feature selection
     # with all minority class samples present into every fold
-    # experiment: a Hybrid/Heterogeneous/Homogeneous/SingleFS object
-    def __init__(self, experiment, datamanager, balanced=True):
+    # selection_method: a Hybrid/Heterogeneous/Homogeneous/SingleFS object
+    def __init__(self, selection_method, datamanager, balanced=True):
 
         self.balanced = balanced
-        self.experiment = experiment
+        self.selection_method = selection_method
         self.dm = datamanager
 
 
@@ -26,8 +26,9 @@ class FinalSelection:
         self.dm.encode_main_dm_df()
         self.dm.compute_data_folds_final_selection()
         self.create_selection_dirs()
-        self.experiment.select_features(self.balanced)
-        self.aggregate_rankings()
+        self.selection_method.select_features(self.balanced)
+        if self.balanced:
+            self.aggregate_rankings()
         return
 
 
@@ -40,9 +41,9 @@ class FinalSelection:
     def aggregate_rankings(self):
         aggregator = Aggregator('borda')
         output_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANKING_FILE_NAME
-        for th in self.experiment.thresholds:
-            self.experiment.rankings_to_aggregate = self.experiment.final_rankings_dict[th]
-            aggregation = aggregator.aggregate(self.experiment)
+        for th in self.selection_method.thresholds:
+            self.selection_method.rankings_to_aggregate = self.selection_method.final_rankings_dict[th]
+            aggregation = aggregator.aggregate(self.selection_method)
             file_name = output_path + str(th)
             self.dm.save_encoded_ranking(aggregation, file_name)
 
