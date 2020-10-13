@@ -93,7 +93,6 @@ def wx_slp(x_train, y_train, x_val, y_val, n_selection=100, hyper_param=wx_hyper
     selected_weights = wx_abs[selected_idx]
 
     K.clear_session()
-
     return selected_idx, selected_weights
 
 
@@ -174,7 +173,7 @@ def select(df):
     # Note: the validation data used here is the same as the training since we are not
     # interested in validation at this point of the experiments run
     hp = WxHyperParameter(epochs=30, learning_ratio=0.01, batch_size=8, verbose=False)
-    sel_idx, sel_weight = wx_slp(x_all, y_true, x_all, y_true, n_selection=len(df.columns)-1, 
+    sel_idx, _ = wx_slp(x_all, y_true, x_all, y_true, n_selection=len(df.columns)-1, 
                                     hyper_param=hp, num_cls=2)
 
     return build_rank(df, sel_idx)

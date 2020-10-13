@@ -51,10 +51,11 @@ class Experiments:
                 they have only one element. The same goes for experiments object itself. 
     """
 
-    def __init__(self, experiments, results_path):
+    def __init__(self, experiments, results_path, final_selection_balanced=True):
 
         rpackages.quiet_require('FSelectorRcpp')
         self.experiments = experiments
+        self.final_selection_balanced = final_selection_balanced
 
         if results_path[-1] != "/":
             self.results_path = results_path + "/"
@@ -156,7 +157,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
         
-        final_selection = FinalSelection(ensemble, dm, True)
+        final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -193,7 +194,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(ensemble, dm, True)
+        final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -230,7 +231,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(ensemble, dm, True)
+        final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -267,7 +268,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(feature_selector, dm, True)
+        final_selection = FinalSelection(feature_selector, dm, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
