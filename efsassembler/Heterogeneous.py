@@ -1,16 +1,16 @@
 from efsassembler.Logger import Logger
-from efsassembler.Selector import FSelector, PySelector, RSelector
+from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
+from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SELECTION_PATH
 
 class Heterogeneous:
     
-    # fs_methods: a tuple (script name, language which the script was written, .rds output name)
-    def __init__(self, data_manager:DataManager, fs_methods, aggregator, thresholds:list):
+    # fr_methods: a tuple (script name, language which the script was written, .rds output name)
+    def __init__(self, data_manager:DataManager, fr_methods, aggregator, thresholds:list):
 
         self.dm = data_manager
-        self.fs_methods = FSelector.generate_fselectors_object(fs_methods)
+        self.fr_methods = FeatureRanker.generate_ranker_object(fr_methods)
         self.aggregator = Aggregator(aggregator)
         self.rankings_to_aggregate = None
 
@@ -29,13 +29,13 @@ class Heterogeneous:
     def het_feature_selection(self, df, output_path, in_experiment=True):
         
         rankings = []
-        for fs_method in self.fs_methods:  
+        for fr_method in self.fr_methods:  
             rankings.append(
-                fs_method.select(df, output_path, save_ranking=in_experiment)
+                fr_method.select(df, output_path, save_ranking=in_experiment)
             )
         
         self.__set_rankings_to_aggregate(rankings)
-        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+        file_path = output_path + AGGREGATED_RANK_FILE_NAME
         for th in self.thresholds:
             Logger.aggregating_rankings()
             Logger.for_threshold(th)

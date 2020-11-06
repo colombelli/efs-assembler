@@ -1,4 +1,5 @@
-AGGREGATED_RANKING_FILE_NAME = "agg_ranking_th"
+AGGREGATED_RANK_FILE_NAME = "agg_rank_th"
+SINGLE_RANK_FILE_NAME = "features_rank"
 SELECTION_PATH = "/selection/"
 
 # Used in Evaluator and InformationManager

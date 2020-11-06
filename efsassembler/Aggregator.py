@@ -26,7 +26,7 @@ class Aggregator:
 
     def __check_for_script_file(self):
         pkgdir = sys.modules['efsassembler'].__path__[0] + "/"
-        user_alg_path = pkgdir + "aggreg_algorithms/user_algorithms/"
+        user_alg_path = pkgdir + "aggregators/user_algorithms/"
         user_script = os.path.isfile(user_alg_path + self.aggregation_method + ".py")
 
         if user_script:
@@ -39,10 +39,10 @@ class Aggregator:
     def __is_heavy_required(self):
         try:
             if self.user_script:
-                return importlib.import_module("efsassembler.aggreg_algorithms.user_algorithms" + \
+                return importlib.import_module("efsassembler.aggregators.user_algorithms" + \
                                                 self.aggregation_method).heavy
             else:
-                return importlib.import_module("efsassembler.aggreg_algorithms." + \
+                return importlib.import_module("efsassembler.aggregators." + \
                                                 self.aggregation_method).heavy
         except:
             return False
@@ -51,10 +51,10 @@ class Aggregator:
     def __is_threshold_sensitive(self):
         try:
             if self.user_script:
-                return importlib.import_module("efsassembler.aggreg_algorithms.user_algorithms" + \
+                return importlib.import_module("efsassembler.aggregators.user_algorithms" + \
                                                 self.aggregation_method).threshold_sensitive
             else:
-                return importlib.import_module("efsassembler.aggreg_algorithms." + \
+                return importlib.import_module("efsassembler.aggregators." + \
                                                 self.aggregation_method).threshold_sensitive
         except:
             return False
@@ -63,10 +63,10 @@ class Aggregator:
     # selector: a Hybrid/Heterogeneous/Homogeneous object
     def aggregate(self, selector): 
         if self.user_script:
-            agg_foo = importlib.import_module("efsassembler.aggreg_algorithms.user_algorithms" + \
+            agg_foo = importlib.import_module("efsassembler.aggregators.user_algorithms" + \
                                                 self.aggregation_method).aggregate
         else:
-            agg_foo = importlib.import_module("efsassembler.aggreg_algorithms." + \
+            agg_foo = importlib.import_module("efsassembler.aggregators." + \
                                                 self.aggregation_method).aggregate
         
         return agg_foo(self, selector)

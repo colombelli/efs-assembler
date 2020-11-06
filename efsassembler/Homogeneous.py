@@ -1,17 +1,17 @@
 from efsassembler.Logger import Logger
-from efsassembler.Selector import FSelector, PySelector, RSelector
+from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, SELECTION_PATH
+from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SELECTION_PATH
 
 class Homogeneous:
     
-    # fs_method: a single elemet list (to maintain coherence) whose element is a tuple: 
+    # fr_method: a single elemet list (to maintain coherence) whose element is a tuple: 
     # (script name, language which the script was written, .csv output name)
-    def __init__(self, data_manager:DataManager, fs_method, aggregator, thresholds:list):
+    def __init__(self, data_manager:DataManager, fr_method, aggregator, thresholds:list):
 
         self.dm = data_manager
-        self.fs_method = FSelector.generate_fselectors_object(fs_method)[0]
+        self.fr_method = FeatureRanker.generate_ranker_object(fr_method)[0]
         self.aggregator = Aggregator(aggregator)
         self.rankings_to_aggregate = None
 
@@ -43,11 +43,11 @@ class Homogeneous:
                 Logger.bootstrap_iteration(j+1)
                 
             bootstrap_data = self.dm.pd_df.iloc[bootstrap]
-            rankings.append(self.fs_method.select(bootstrap_data, ranking_path, save_ranking=in_experiment))
+            rankings.append(self.fr_method.select(bootstrap_data, ranking_path, save_ranking=in_experiment))
 
         self.__set_rankings_to_aggregate(rankings)
         
-        file_path = output_path + AGGREGATED_RANKING_FILE_NAME
+        file_path = output_path + AGGREGATED_RANK_FILE_NAME
         for th in self.thresholds:
             Logger.aggregating_rankings()
             Logger.for_threshold(th)

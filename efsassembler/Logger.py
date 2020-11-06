@@ -118,8 +118,8 @@ class Logger:
         return
 
     @classmethod
-    def evaluating_x_fs_method(self, fs_method):
-        log = "Evaluating " + str(fs_method) + " FS method"
+    def evaluating_x_fr_method(self, fr_method):
+        log = "Evaluating " + str(fr_method) + " FS method"
         Logger.handler.info(log)
         return
 

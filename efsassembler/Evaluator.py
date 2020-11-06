@@ -8,7 +8,7 @@ import numpy as np
 import efsassembler.kuncheva_index as ki
 from efsassembler.Logger import Logger
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANKING_FILE_NAME, FINAL_CONFUSION_MATRICES_FILE_NAME, ACCURACY_METRIC, ROC_AUC_METRIC, PRECISION_RECALL_AUC_METRIC
+from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_NAME, FINAL_CONFUSION_MATRICES_FILE_NAME, ACCURACY_METRIC, ROC_AUC_METRIC, PRECISION_RECALL_AUC_METRIC
 
 class Evaluator:
 
@@ -196,7 +196,7 @@ class Evaluator:
         final_rankings = []
         for fold_iteration in range(self.dm.num_folds):
             ranking_path = self.dm.results_path + "fold_" + str(fold_iteration+1) + "/"
-            file_path = ranking_path + AGGREGATED_RANKING_FILE_NAME + str(threshold) + ".csv"
+            file_path = ranking_path + AGGREGATED_RANK_FILE_NAME + str(threshold) + ".csv"
             ranking = self.dm.load_csv(file_path)
             final_rankings.append(ranking)
 
@@ -294,10 +294,10 @@ class Evaluator:
                                 # and the value is a intermediate ranking like
                                 # evaluation
 
-        for fs_method in level1_rankings:
-            Logger.evaluating_x_fs_method(fs_method)
-            level1_evaluation[fs_method] = self.__evaluate_intermediate_rankings(
-                                                        level1_rankings[fs_method])
+        for fr_method in level1_rankings:
+            Logger.evaluating_x_fr_method(fr_method)
+            level1_evaluation[fr_method] = self.__evaluate_intermediate_rankings(
+                                                        level1_rankings[fr_method])
         return level1_evaluation
 
 
@@ -385,7 +385,7 @@ class Evaluator:
         single_fs_names = []
         for path in single_ranking_file_names:
             single_fs_names.append(
-                self.__get_fs_method_name_by_its_path(path)
+                self.__get_fr_method_name_by_its_path(path)
             )
 
         return single_fs_names
@@ -396,28 +396,28 @@ class Evaluator:
                     "bootstrap_" + str(bootstrap) + "/"
 
 
-    def __get_fs_method_name_by_its_path(self, path):
+    def __get_fr_method_name_by_its_path(self, path):
         return path.split("/")[-1].split(".")[0]
 
 
     def __get_single_fs_ranking_file_names(self, path):
         file_names_style = path + "*.csv"
         return [f for f in glob.glob(f"{file_names_style}") 
-                    if AGGREGATED_RANKING_FILE_NAME not in f]
+                    if AGGREGATED_RANK_FILE_NAME not in f]
     
 
     def __load_level1_rankings(self, level1_rankings):
         
-        for fs_method in level1_rankings:
+        for fr_method in level1_rankings:
             for fold_iteration in range(1, self.dm.num_folds+1):
                 
                 bs_rankings = []
                 for bootstrap in range(1, self.dm.num_bootstraps+1):
                     
                     ranking_path = self.__build_ranking_path_string(fold_iteration, bootstrap)
-                    bs_rankings.append(self.__load_single_fs_ranking(ranking_path, fs_method))
+                    bs_rankings.append(self.__load_single_fs_ranking(ranking_path, fr_method))
 
-                level1_rankings[fs_method].append(bs_rankings)
+                level1_rankings[fr_method].append(bs_rankings)
         return
 
     
@@ -429,7 +429,7 @@ class Evaluator:
             for bootstrap in range(1, self.dm.num_bootstraps+1):
                 
                 ranking_path = self.__build_ranking_path_string(fold_iteration, bootstrap)
-                ranking_path += AGGREGATED_RANKING_FILE_NAME
+                ranking_path += AGGREGATED_RANK_FILE_NAME
                 agg_rankings.append(ranking_path)
 
             level2_ranking_paths.append(agg_rankings)
@@ -437,14 +437,14 @@ class Evaluator:
 
 
     def __load_agg_rankings(self, ranking_path):
-        file = ranking_path + AGGREGATED_RANKING_FILE_NAME 
+        file = ranking_path + AGGREGATED_RANK_FILE_NAME 
         ranking = self.dm.load_RDS(file)
         ranking = self.dm.r_to_pandas(ranking)
         return ranking
 
     
-    def __load_single_fs_ranking(self, ranking_path, fs_method):
-        file = ranking_path + fs_method + ".csv"
+    def __load_single_fs_ranking(self, ranking_path, fr_method):
+        file = ranking_path + fr_method + ".csv"
         ranking = self.dm.load_csv(file)
         return ranking
 

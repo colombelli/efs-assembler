@@ -69,35 +69,35 @@ class InformationManager:
 
     def __get_single_fs_info(self):
 
-        fs_method = SINGLE_FS_INFO_FILE + self.methods[0]
-        self.info_txt_lines = [fs_method]
+        fr_method = SINGLE_FS_INFO_FILE + self.methods[0]
+        self.info_txt_lines = [fr_method]
         return
     
     def __get_homogeneous_info(self):
 
         num_bootstraps = NUM_BOOTSTRAPS_INFO_FILE + str(self.dm.num_bootstraps)
-        fs_method = SINGLE_FS_INFO_FILE + self.methods[0]
+        fr_method = SINGLE_FS_INFO_FILE + self.methods[0]
         aggregator = HET_HOM_AGG_INFO_FILE + self.aggregators[0]
 
-        self.info_txt_lines = [num_bootstraps, fs_method, aggregator]
+        self.info_txt_lines = [num_bootstraps, fr_method, aggregator]
         return
     
     def __get_heterogeneous_info(self):
         methods_title = MULTIPLE_FS_INFO_FILE
-        fs_methods = ["- " + method for method in self.methods]
+        fr_methods = ["- " + method for method in self.methods]
         aggregator = HET_HOM_AGG_INFO_FILE + self.aggregators[0]
 
-        self.info_txt_lines = [methods_title] + fs_methods + [aggregator]
+        self.info_txt_lines = [methods_title] + fr_methods + [aggregator]
         return
     
     def __get_hybrid_info(self):
         num_bootstraps = NUM_BOOTSTRAPS_INFO_FILE + str(self.dm.num_bootstraps)
         methods_title = MULTIPLE_FS_INFO_FILE
-        fs_methods = ["- " + method for method in self.methods]
+        fr_methods = ["- " + method for method in self.methods]
         fst_aggregator = HYB_FST_AGG_INFO_FILE + self.aggregators[0]
         snd_aggregator = HYB_SND_AGG_INFO_FILE + self.aggregators[1]
 
-        self.info_txt_lines = [num_bootstraps, methods_title] + fs_methods + \
+        self.info_txt_lines = [num_bootstraps, methods_title] + fr_methods + \
                                 [fst_aggregator, snd_aggregator]
         return
 
@@ -225,31 +225,31 @@ class InformationManager:
 
     def __create_level1_csv_tables(self, level1_evaluation):
         
-        for fs_method in level1_evaluation:
-            stabilities = level1_evaluation[fs_method][0]
-            prediction_performances = level1_evaluation[fs_method][1]
+        for fr_method in level1_evaluation:
+            stabilities = level1_evaluation[fr_method][0]
+            prediction_performances = level1_evaluation[fr_method][1]
             
             accs = prediction_performances[ACCURACY_METRIC]
             roc_aucs = prediction_performances[ROC_AUC_METRIC]
             pr_aucs = prediction_performances[PRECISION_RECALL_AUC_METRIC]
 
 
-            accs_table_file_name = fs_method + "_" + CSV_ACCURACY_TABLE_FILE_NAME
+            accs_table_file_name = fr_method + "_" + CSV_ACCURACY_TABLE_FILE_NAME
             self.__create_intermediate_csv_accuracy_table(
                 accs, accs_table_file_name) 
 
-            roc_aucs_table_file_name = fs_method + "_roc" + CSV_AUC_TABLE_FILE_NAME
+            roc_aucs_table_file_name = fr_method + "_roc" + CSV_AUC_TABLE_FILE_NAME
             self.__create_intermediate_csv_auc_table(
                 roc_aucs, roc_aucs_table_file_name, ROC_AUC_METRIC)
 
-            pr_aucs_table_file_name = fs_method + "_pr" + CSV_AUC_TABLE_FILE_NAME
+            pr_aucs_table_file_name = fr_method + "_pr" + CSV_AUC_TABLE_FILE_NAME
             self.__create_intermediate_csv_auc_table(
                 pr_aucs, pr_aucs_table_file_name, PRECISION_RECALL_AUC_METRIC)
 
-            stb_table_file_name = fs_method + "_" + CSV_STB_TABLE_FILE_NAME
+            stb_table_file_name = fr_method + "_" + CSV_STB_TABLE_FILE_NAME
             self.__create_intermediate_csv_stabilities_table(stabilities, stb_table_file_name)
 
-            final_results_file_name = fs_method + "_" + CSV_FINAL_RESULTS_TABLE_FILE_NAME
+            final_results_file_name = fr_method + "_" + CSV_FINAL_RESULTS_TABLE_FILE_NAME
             self.__create_intermediate_csv_final_results(prediction_performances, stabilities, final_results_file_name)
         return
 

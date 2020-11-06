@@ -7,7 +7,7 @@ from efsassembler.DataManager import DataManager
 from efsassembler.Hybrid import Hybrid
 from efsassembler.Heterogeneous import Heterogeneous
 from efsassembler.Homogeneous import Homogeneous
-from efsassembler.SingleFS import SingleFS
+from efsassembler.SingleFR import SingleFR
 from efsassembler.Evaluator import Evaluator
 from efsassembler.InformationManager import InformationManager
 from efsassembler.FinalSelection import FinalSelection
@@ -56,7 +56,7 @@ class Experiments:
         
         self.experiments = experiments
         self.final_selection_balanced = final_selection_balanced
-        self._should_load_FSelector()
+        self._should_load_FSelectorRcpp()
 
         if results_path[-1] != "/":
             self.results_path = results_path + "/"
@@ -71,7 +71,7 @@ class Experiments:
         return rad+sufix
 
 
-    def _should_load_FSelector(self):
+    def _should_load_FSelectorRcpp(self):
         for experiment in self.experiments:
             for selector in experiment["selectors"]:
                 if selector[1] == 'r':
@@ -263,7 +263,7 @@ class Experiments:
 
         ev = Evaluator(dm, ths, False)
         im = InformationManager(dm, ev, str_selectors)
-        feature_selector = SingleFS(dm, selector, ths)
+        feature_selector = SingleFR(dm, selector, ths)
 
         st = time()
         feature_selector.select_features_experiment()
