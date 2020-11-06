@@ -7,11 +7,11 @@ def select(df):
     y = df.iloc[:, -1]
 
     estimator = SVR(kernel="linear")
-    selector = RFE(estimator=estimator, step=1)
-    selector = selector.fit(X, y)
+    ranker = RFE(estimator=estimator, step=1)
+    ranker = ranker.fit(X, y)
 
 
-    data = {"rank": selector.ranking_}
+    data = {"rank": ranker.ranking_}
     rank = pd.DataFrame(data, index=list(X.columns))
     rank = rank.sort_values(by="rank")
 

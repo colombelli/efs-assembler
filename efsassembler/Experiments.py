@@ -26,12 +26,12 @@ class Experiments:
             "folds": <int number of folds for the StratifiedKFold cross-validation>,
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
             "aggregators": [<aggregator1 object>, <aggregator2 object>],
-            "selectors": [<selector1 object>, <selector2 object>, ..., <selectorn object>],
+            "rankers": [<ranker1 object>, <ranker2 object>, ..., <rankern object>],
             "datasets": [<path to dataset1>, <path to dataset2>, ..., <path to dataset n>]
         }
 
         <experiment type>: 
-            "sin" for single selector (no ensemble technique applied, just the chosen feature selector)
+            "sin" for single ranker (no ensemble technique applied, just the chosen feature ranker)
             "het" for heterogeneous ensemble
             "hom" for homogeneous ensemble
             "hyb" for hybrid ensemble
@@ -39,15 +39,15 @@ class Experiments:
         <agreggator object>:
             "aggregation_method_file_name"
 
-        <selector object>:
-            a tuple: ("selector_method_file_name", <programming language object>, "ranking_file_name.rds")
+        <ranker object>:
+            a tuple: ("ranker_method_file_name", <programming language object>, "rank_file_name.rds")
 
         <programming language object>
             either "python" or "r"
 
 
 
-        Note: "thresholds", "aggregators", "selectors" and "datasets" properties need to be lists, even if
+        Note: "thresholds", "aggregators", "rankers" and "datasets" properties need to be lists, even if
                 they have only one element. The same goes for experiments object itself. 
     """
 
@@ -73,8 +73,8 @@ class Experiments:
 
     def _should_load_FSelectorRcpp(self):
         for experiment in self.experiments:
-            for selector in experiment["selectors"]:
-                if selector[1] == 'r':
+            for ranker in experiment["rankers"]:
+                if ranker[1] == 'r':
                     rpackages.quiet_require('FSelectorRcpp')
                     return
         return
@@ -97,23 +97,23 @@ class Experiments:
                 ths = exp["thresholds"]
 
                 if exp["type"] == 'sin':
-                    self.perform_selection_single(dataset_path, complete_results_path, exp["selectors"],
+                    self.perform_selection_single(dataset_path, complete_results_path, exp["rankers"],
                                                     int_folds, int_seed, ths)
 
                 elif exp["type"] == 'hom':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hom(dataset_path, complete_results_path,
-                                                exp["selectors"], exp["aggregators"][0], int_folds,
+                                                exp["rankers"], exp["aggregators"][0], int_folds,
                                                 int_bootstraps, int_seed, ths)
 
                 elif exp["type"] == 'het':
                     self.perform_selection_het(dataset_path, complete_results_path,
-                                                exp["selectors"], exp["aggregators"][0], int_folds,
+                                                exp["rankers"], exp["aggregators"][0], int_folds,
                                                 int_seed, ths)
                     
                 elif exp["type"] == 'hyb':
                     int_bootstraps = round(int(exp["bootstraps"]))
-                    self.perform_selection_hyb(dataset_path, complete_results_path, exp["selectors"], 
+                    self.perform_selection_hyb(dataset_path, complete_results_path, exp["rankers"], 
                                                 exp["aggregators"][0], exp["aggregators"][1], 
                                                 int_folds, int_bootstraps, int_seed, ths)
         return
@@ -132,11 +132,11 @@ class Experiments:
 
 
 
-    def perform_selection_hyb(self, dataset_path, results_path, selectors, aggregator1, aggregator2,
+    def perform_selection_hyb(self, dataset_path, results_path, rankers, aggregator1, aggregator2,
                                 num_folds, num_bootstraps, seed, ths):
         
         str_aggregators = [aggregator1, aggregator2]
-        str_selectors = [i[0] for i in selectors]
+        str_rankers = [i[0] for i in rankers]
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
         Logger.encoding_dataset()
@@ -145,8 +145,8 @@ class Experiments:
         dm.init_data_folding_process()
 
         ev = Evaluator(dm, ths, False)
-        im = InformationManager(dm, ev, str_selectors, str_aggregators)
-        ensemble = Hybrid(dm, selectors, aggregator1, aggregator2, ths)
+        im = InformationManager(dm, ev, str_rankers, str_aggregators)
+        ensemble = Hybrid(dm, rankers, aggregator1, aggregator2, ths)
 
         st = time()
         ensemble.select_features_experiment()
@@ -156,16 +156,10 @@ class Experiments:
         dm.decode_main_dm_df()
 
         Logger.starting_evaluation_process()
-        ev.evaluate_final_rankings()
+        ev.evaluate_final_ranks()
 
         Logger.creating_csv_files()
         im.create_csv_tables()
-
-        Logger.evaluating_inner_levels()
-        level1_evaluation, level2_evaluation = ev.evaluate_intermediate_hyb_rankings()
-
-        Logger.creating_csv_files()
-        im.create_intermediate_csv_tables(level1_evaluation, level2_evaluation)
         
         final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
         final_selection.start()
@@ -174,11 +168,11 @@ class Experiments:
         return
 
 
-    def perform_selection_het(self, dataset_path, results_path, selectors, 
+    def perform_selection_het(self, dataset_path, results_path, rankers, 
                                 aggregator, num_folds, seed, ths):
 
         str_aggregators = [aggregator]
-        str_selectors = [i[0] for i in selectors]
+        str_rankers = [i[0] for i in rankers]
         num_bootstraps = 0
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
@@ -188,8 +182,8 @@ class Experiments:
         dm.init_data_folding_process()
         
         ev = Evaluator(dm, ths, False)
-        im = InformationManager(dm, ev, str_selectors, str_aggregators)
-        ensemble = Heterogeneous(dm, selectors, aggregator, ths)
+        im = InformationManager(dm, ev, str_rankers, str_aggregators)
+        ensemble = Heterogeneous(dm, rankers, aggregator, ths)
 
         st = time()
         ensemble.select_features_experiment()
@@ -199,7 +193,7 @@ class Experiments:
         dm.decode_main_dm_df()
 
         Logger.starting_evaluation_process()
-        ev.evaluate_final_rankings()
+        ev.evaluate_final_ranks()
 
         Logger.creating_csv_files()
         im.create_csv_tables()
@@ -212,11 +206,11 @@ class Experiments:
 
     
 
-    def perform_selection_hom(self, dataset_path, results_path, selector, 
+    def perform_selection_hom(self, dataset_path, results_path, ranker, 
                                 aggregator, num_folds, num_bootstraps, seed, ths):
 
         str_aggregators = [aggregator]
-        str_selectors = [selector[0][0]]
+        str_rankers = [ranker[0][0]]
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
         Logger.encoding_dataset()
@@ -225,8 +219,8 @@ class Experiments:
         dm.init_data_folding_process()
 
         ev = Evaluator(dm, ths, False)
-        im = InformationManager(dm, ev, str_selectors, str_aggregators)
-        ensemble = Homogeneous(dm, selector, aggregator, ths)
+        im = InformationManager(dm, ev, str_rankers, str_aggregators)
+        ensemble = Homogeneous(dm, ranker, aggregator, ths)
 
         st = time()
         ensemble.select_features_experiment() 
@@ -236,7 +230,7 @@ class Experiments:
         dm.decode_main_dm_df()
 
         Logger.starting_evaluation_process()
-        ev.evaluate_final_rankings()
+        ev.evaluate_final_ranks()
 
         Logger.creating_csv_files()
         im.create_csv_tables()
@@ -250,10 +244,10 @@ class Experiments:
     
 
     def perform_selection_single(self, dataset_path, results_path, 
-                                selector, num_folds, seed, ths):
+                                ranker, num_folds, seed, ths):
 
         num_bootstraps = 0
-        str_selectors = [selector[0][0]]    # because selector is always a list, even when it have only one element
+        str_rankers = [ranker[0][0]]    # because ranker is always a list, even when it have only one element
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
         Logger.encoding_dataset()
@@ -262,23 +256,23 @@ class Experiments:
         dm.init_data_folding_process()
 
         ev = Evaluator(dm, ths, False)
-        im = InformationManager(dm, ev, str_selectors)
-        feature_selector = SingleFR(dm, selector, ths)
+        im = InformationManager(dm, ev, str_rankers)
+        feature_ranker = SingleFR(dm, ranker, ths)
 
         st = time()
-        feature_selector.select_features_experiment()
+        feature_ranker.select_features_experiment()
         self.compute_time_taken(st)
 
         Logger.decoding_dataframe()
         dm.decode_main_dm_df()
 
         Logger.starting_evaluation_process()
-        ev.evaluate_final_rankings()
+        ev.evaluate_final_ranks()
 
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(feature_selector, dm, self.final_selection_balanced)
+        final_selection = FinalSelection(feature_ranker, dm, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()

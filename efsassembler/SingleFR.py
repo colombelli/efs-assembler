@@ -1,7 +1,7 @@
 from efsassembler.Logger import Logger
 from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SELECTION_PATH
+from efsassembler.Constants import SINGLE_RANK_FILE_NAME, SELECTION_PATH
 
 class SingleFR:
     
@@ -19,10 +19,11 @@ class SingleFR:
     def __init_final_rankings_dict(self):
         for th in self.thresholds:
             self.final_rankings_dict[th] = []
+        self.final_rankings_dict[0] = []
         return
 
 
-    # In order to reuse Evaluator class, we need an AGGREGATED_RANK_FILE_NAME+th
+    # In order to reuse Evaluator class, we need an SINGLE_RANK_FILE_NAME
     # accessible inside each fold iteration folder, so we simply resave the only
     # ranking we have with the appropriate name
 
@@ -40,9 +41,8 @@ class SingleFR:
             ranking = self.fr_method.select(training_data, output_path)
 
             output_path = self.dm.get_output_path(fold_iteration=i)
-            file_path = output_path + AGGREGATED_RANK_FILE_NAME
-            for th in self.thresholds:
-                self.dm.save_encoded_ranking(ranking, file_path+str(th)) 
+            file_path = output_path + SINGLE_RANK_FILE_NAME
+            self.dm.save_encoded_ranking(ranking, file_path) 
             
         return
 
@@ -57,20 +57,15 @@ class SingleFR:
                 df = self.dm.pd_df.loc[fold]
                 ranking = self.fr_method.select(df, save_ranking=False)
                 output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
-                file_path = output_path + AGGREGATED_RANK_FILE_NAME
-                
-                for th in self.thresholds:
-                    self.dm.save_encoded_ranking(ranking, file_path+str(th))
-                    self.final_rankings_dict[th].append(ranking)
+                file_path = output_path + SINGLE_RANK_FILE_NAME
+                self.dm.save_encoded_ranking(ranking, file_path)
+                self.final_rankings_dict[0].append(ranking)
 
         else:
             Logger.whole_dataset_selection()
-            output_path = self.dm.results_path + SELECTION_PATH
             ranking = self.fr_method.select(self.dm.pd_df, save_ranking=False)
             output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
-            file_path = output_path + AGGREGATED_RANK_FILE_NAME
-            
-            for th in self.thresholds:
-                    self.dm.save_encoded_ranking(ranking, file_path+str(th))
+            file_path = output_path + SINGLE_RANK_FILE_NAME
+            self.dm.save_encoded_ranking(ranking, file_path)
              
         return

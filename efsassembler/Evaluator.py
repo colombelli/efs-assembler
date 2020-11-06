@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 import glob
+from pathlib import Path
 from sklearn.svm import SVC
 from sklearn.ensemble import GradientBoostingClassifier as GBC
 from sklearn import metrics
@@ -20,14 +21,14 @@ class Evaluator:
         self.thresholds = None
         self.frac_thresholds = None
         self.__init_thresholds(thresholds, th_in_fraction)
+        
+        self.final_ranks = None     # If the ranks are threshold sensitive, than they will be loaded
+                                    # at each iteration to save memory
+        self.is_agg_th_sensible = None
+        self.__infer_if_agg_th_sensible()
 
         self.current_threshold = None
-        self.current_eval_level = None  # 3: second layer aggregated rankings
-                                        # 2: first layer aggregated rankings
-                                        # 1: first rankings built from single FS methods
-        
         self.classifier = None
-
         self.prediction_performances = None
         self.stabilities = None
         self.rankings = None
@@ -37,6 +38,7 @@ class Evaluator:
         self.testing_y = None
 
         self.confusion_matrices = []
+        
 
     
     def __init_thresholds(self, thresholds, th_in_fraction):
@@ -90,6 +92,29 @@ class Evaluator:
         return updated_int_thresholds, frac_thresholds
 
 
+    def __infer_if_agg_th_sensible(self):
+
+        file_name = Path(self.dm.results_path + "fold_1/" + \
+                        AGGREGATED_RANK_FILE_NAME + str(self.thresholds[0]) + ".csv")
+        if file_name.is_file():
+            self.is_agg_th_sensible = True
+        else:
+            self.is_agg_th_sensible = False
+        return
+
+
+    def __load_final_ranks(self):
+        final_ranks = []
+        for fold_iteration in range(self.dm.num_folds):
+            ranking_path = self.dm.results_path + "fold_" + str(fold_iteration+1) + "/"
+            file_path = ranking_path + SINGLE_RANK_FILE_NAME + ".csv"
+            ranking = self.dm.load_csv(file_path)
+            final_ranks.append(ranking)
+            
+        self.final_ranks = final_ranks
+        return
+
+
     def __reset_classifier(self):
         #self.classifier = SVC(gamma='auto', probability=True)
         self.classifier = GBC()
@@ -100,18 +125,16 @@ class Evaluator:
         return
 
 
-    def __get_gene_lists(self, pd_rankings):
-        gene_lists = []
-
+    def __get_feature_lists(self, pd_rankings):
+        feature_lists = []
         for ranking in pd_rankings:
             index_names_arr = ranking.index.values
-            gene_lists.append(list(index_names_arr))
-        
-        return gene_lists
+            feature_lists.append(list(index_names_arr))
+        return feature_lists
 
 
-    def __get_x(self, df, genes):
-        return df.loc[:, genes]
+    def __get_x(self, df, features):
+        return df.loc[:, features]
     
     def __get_y(self, df):
         return df.loc[:, ['class']].T.values[0]
@@ -151,10 +174,12 @@ class Evaluator:
 
 
 
-    def evaluate_final_rankings(self):
+    def evaluate_final_ranks(self):
         self.dm.set_seed()  # reset seed internal state allowing reproducibility for the
                             # evaluation process alone without performing feature selection 
-        self.current_eval_level = 3
+        
+        if not self.is_agg_th_sensible:
+            self.__load_final_ranks()
 
         Logger.computing_stabilities()
         stabilities = self.__compute_stabilities()
@@ -172,46 +197,30 @@ class Evaluator:
         return self.stabilities, self.prediction_performances
     
 
-    def __compute_stabilities(self, final_rankings_intermediate=None):
-             
+    def __compute_stabilities(self, final_ranks_intermediate=None):
+
         th_stabilities = []
         for th in self.thresholds:
-
-            if self.current_eval_level == 3:
-                final_rankings = self.__get_final_rankings(th)
-            elif self.current_eval_level == 2:
-                final_rankings = self.__get_lvl2_rankings(th, final_rankings_intermediate)
-            elif self.current_eval_level == 1:
-                final_rankings = final_rankings_intermediate
-
-
-            self.rankings = self.__get_gene_lists(final_rankings)
+            final_ranks = self.__get_final_ranks(th)
+            self.rankings = self.__get_feature_lists(final_ranks)
             th_stabilities.append(self.get_stability(th))
 
         return th_stabilities
 
     
-    def __get_final_rankings(self, threshold):
+    def __get_final_ranks(self, threshold):
 
-        final_rankings = []
+        if not self.is_agg_th_sensible:
+            return self.final_ranks
+
+        final_ranks = []
         for fold_iteration in range(self.dm.num_folds):
             ranking_path = self.dm.results_path + "fold_" + str(fold_iteration+1) + "/"
             file_path = ranking_path + AGGREGATED_RANK_FILE_NAME + str(threshold) + ".csv"
             ranking = self.dm.load_csv(file_path)
-            final_rankings.append(ranking)
+            final_ranks.append(ranking)
 
-        return final_rankings
-
-    
-    def __get_lvl2_rankings(self, threshold, lvl2_ranking_paths):
-        
-        final_rankings = []
-        for ranking_path in lvl2_ranking_paths:
-            ranking_path += str(threshold) + ".csv"
-            ranking = self.dm.load_csv(ranking_path)
-            final_rankings.append(ranking)
-
-        return final_rankings
+        return final_ranks
 
 
     def __compute_prediction_performances(self, folds_sampling):
@@ -231,11 +240,11 @@ class Evaluator:
 
             for th in self.thresholds:
                 
-                final_rankings = self.__get_final_rankings(th)
-                self.rankings = self.__get_gene_lists(final_rankings)
+                final_ranks = self.__get_final_ranks(th)
+                self.rankings = self.__get_feature_lists(final_ranks)
 
-                genes = self.rankings[i][0:th]
-                self.__set_data_axes(training, testing, genes)
+                features = self.rankings[i][0:th]
+                self.__set_data_axes(training, testing, features)
                 acc, roc, pr = self.get_prediction_performance()
                 th_accuracies.append(acc)
                 th_roc_aucs.append(roc)
@@ -249,14 +258,14 @@ class Evaluator:
         
         return prediction_performances
 
-    def __set_data_axes(self, training, testing, genes):
+    def __set_data_axes(self, training, testing, features):
 
         training_df = self.dm.pd_df.iloc[training]
         testing_df = self.dm.pd_df.iloc[testing]
 
-        self.training_x = self.__get_x(training_df, genes)
+        self.training_x = self.__get_x(training_df, features)
         self.training_y = self.__get_y(training_df)
-        self.testing_x = self.__get_x(testing_df, genes)
+        self.testing_x = self.__get_x(testing_df, features)
         self.testing_y = self.__get_y(testing_df)
         return
 
@@ -272,214 +281,3 @@ class Evaluator:
         with open(path, 'wb') as handle:
             pickle.dump(self.confusion_matrices, handle, protocol=pickle.HIGHEST_PROTOCOL)
         return
-
-
-    def evaluate_intermediate_hyb_rankings(self):
-        
-        level1_rankings, level2_rankings = self.__get_intermediate_rankings()
-        
-        Logger.evaluating_n_level(1)
-        self.current_eval_level = 1
-        level1_evaluation = self.__evaluate_level1_rankings(level1_rankings)
-
-        Logger.evaluating_n_level(2)
-        self.current_eval_level = 2
-        level2_evaluation = self.__evaluate_intermediate_rankings(level2_rankings)        
-        return level1_evaluation, level2_evaluation
-        
-
-    def __evaluate_level1_rankings(self, level1_rankings):
-        
-        level1_evaluation = {}  # a dict where each key is a single fs method
-                                # and the value is a intermediate ranking like
-                                # evaluation
-
-        for fr_method in level1_rankings:
-            Logger.evaluating_x_fr_method(fr_method)
-            level1_evaluation[fr_method] = self.__evaluate_intermediate_rankings(
-                                                        level1_rankings[fr_method])
-        return level1_evaluation
-
-
-
-    def __evaluate_intermediate_rankings(self, final_rankings):
-        
-        with open(self.dm.results_path+"fold_sampling.pkl", 'rb') as file:
-            folds_sampling = pickle.load(file)
-
-        prediction_performances = {
-            ACCURACY_METRIC: [],
-            ROC_AUC_METRIC: [],
-            PRECISION_RECALL_AUC_METRIC: []
-        }
-        stabilities = []
-        for i, fold_rankings in enumerate(final_rankings):
-
-            Logger.computing_stabilities()
-            stabilities.append(self.__compute_stabilities(fold_rankings))
-
-            
-            Logger.computing_prediction_performances()
-            acc, roc, pr = self.__compute_intermediate_pred_perf(folds_sampling[i], fold_rankings) 
-            prediction_performances[ACCURACY_METRIC] += acc
-            prediction_performances[ROC_AUC_METRIC] += roc
-            prediction_performances[PRECISION_RECALL_AUC_METRIC] += pr
-                
-        return stabilities, prediction_performances
-
-    
-    def __get_intermediate_rankings(self):
-
-        level2_rankings_paths = []  # each item is a list representing each fold iteration
-                              # these lists contain the ranking paths for each bootstrap
-                              # [
-                              # fold1 = [agg_r1, agg_r2, agg_r3, ...],
-                              # fold2 = [agg_r1, agg_r2, agg_r3, ...],
-                              # fold3 = [agg_r1, agg_r2, agg_r3, ...],
-                              #  ...
-                              # ] 
-
-
-        level1_rankings = {}  # each key is a fs method
-                              # each value is a level2_rankings kind-of-structure
-                              
-        # so it looks like:
-        # level1_rankings = {
-        #              fs1: [
-        #                       fold1 = [r1, r2, r3, ...],
-        #                       fold2 = [r1, r2, r3, ...],
-        #                       fold3 = [r1, r2, r3, ...],
-        #                       ...
-        #               ], 
-        #               fs2: [
-        #                       fold1 = [r1, r2, r3, ...],
-        #                       fold2 = [r1, r2, r3, ...],
-        #                       fold3 = [r1, r2, r3, ...],
-        #                       ...
-        #               ],
-        #               ...         
-        # }
-
-        self.__init_level1_rankings_dict(level1_rankings)
-        Logger.loading_lvl1_rankings()
-        self.__load_level1_rankings(level1_rankings)
-        Logger.loading_lvl2_ranking_paths()
-        self.__load_level2_ranking_paths(level2_rankings_paths)
-
-        return level1_rankings, level2_rankings_paths
-    
-
-    def __init_level1_rankings_dict(self, level1_rankings):
-
-        fs_names = self.__get_single_fs_names()
-        for fs_name in fs_names:
-            level1_rankings[fs_name] = []
-        return
-
-
-    def __get_single_fs_names(self):
-        
-        ranking_path = self.__build_ranking_path_string(1, 1)
-        single_ranking_file_names = self.__get_single_fs_ranking_file_names(
-                                                        ranking_path)
-        single_fs_names = []
-        for path in single_ranking_file_names:
-            single_fs_names.append(
-                self.__get_fr_method_name_by_its_path(path)
-            )
-
-        return single_fs_names
-
-
-    def __build_ranking_path_string(self, fold_iteration, bootstrap):
-        return self.dm.results_path + "fold_" + str(fold_iteration) + "/" + \
-                    "bootstrap_" + str(bootstrap) + "/"
-
-
-    def __get_fr_method_name_by_its_path(self, path):
-        return path.split("/")[-1].split(".")[0]
-
-
-    def __get_single_fs_ranking_file_names(self, path):
-        file_names_style = path + "*.csv"
-        return [f for f in glob.glob(f"{file_names_style}") 
-                    if AGGREGATED_RANK_FILE_NAME not in f]
-    
-
-    def __load_level1_rankings(self, level1_rankings):
-        
-        for fr_method in level1_rankings:
-            for fold_iteration in range(1, self.dm.num_folds+1):
-                
-                bs_rankings = []
-                for bootstrap in range(1, self.dm.num_bootstraps+1):
-                    
-                    ranking_path = self.__build_ranking_path_string(fold_iteration, bootstrap)
-                    bs_rankings.append(self.__load_single_fs_ranking(ranking_path, fr_method))
-
-                level1_rankings[fr_method].append(bs_rankings)
-        return
-
-    
-    def __load_level2_ranking_paths(self, level2_ranking_paths):
-
-        for fold_iteration in range(1, self.dm.num_folds+1):
-            
-            agg_rankings = []
-            for bootstrap in range(1, self.dm.num_bootstraps+1):
-                
-                ranking_path = self.__build_ranking_path_string(fold_iteration, bootstrap)
-                ranking_path += AGGREGATED_RANK_FILE_NAME
-                agg_rankings.append(ranking_path)
-
-            level2_ranking_paths.append(agg_rankings)
-        return
-
-
-    def __load_agg_rankings(self, ranking_path):
-        file = ranking_path + AGGREGATED_RANK_FILE_NAME 
-        ranking = self.dm.load_RDS(file)
-        ranking = self.dm.r_to_pandas(ranking)
-        return ranking
-
-    
-    def __load_single_fs_ranking(self, ranking_path, fr_method):
-        file = ranking_path + fr_method + ".csv"
-        ranking = self.dm.load_csv(file)
-        return ranking
-
-
-    
-    def __compute_intermediate_pred_perf(self, fold_sampling, fold_rankings):
-        
-        if self.current_eval_level == 1:
-            self.rankings = self.__get_gene_lists(fold_rankings)
-        
-        training, testing = fold_sampling
-
-        bs_accs = []
-        bs_roc_aucs = []
-        bs_pr_aucs = []
-
-        th_accs = []
-        th_roc_aucs = []
-        th_pr_aucs = []
-        for th in self.thresholds:
-
-            if self.current_eval_level == 2:
-                rankings = self.__get_lvl2_rankings(th, fold_rankings)
-                self.rankings = self.__get_gene_lists(rankings)
-            
-            for ranking in self.rankings:
-                genes = ranking[0:th]
-                self.__set_data_axes(training, testing, genes)
-                acc, roc, pr = self.get_prediction_performance()
-                th_accs.append(acc)
-                th_roc_aucs.append(roc)
-                th_pr_aucs.append(pr)
-
-        bs_accs.append(th_accs)
-        bs_roc_aucs.append(th_roc_aucs)
-        bs_pr_aucs.append(th_pr_aucs)
-        
-        return bs_accs, bs_roc_aucs, bs_pr_aucs
