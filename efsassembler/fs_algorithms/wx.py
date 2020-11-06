@@ -138,15 +138,15 @@ def naive_SLP_model(x_train, y_train, x_val, y_val, hyper_param=wx_hyperparam, n
 
 def build_rank(df, sel_idx):
     
-    genes = list(df.columns)
+    features = list(df.columns)
     data = {}
-    data['gene'] = []
+    data['features'] = []
     data['rank'] = []
-    for i, gen_id in enumerate(sel_idx):
-        data['gene'].append(genes[gen_id])
+    for i, feature_id in enumerate(sel_idx):
+        data['features'].append(features[feature_id])
         data['rank'].append(i+1)
 
-    rank = pd.DataFrame(data, columns=['rank']).set_index(pd.Index(data['gene']))
+    rank = pd.DataFrame(data, columns=['rank']).set_index(pd.Index(data['features']))
     return rank
 
 
@@ -167,7 +167,7 @@ def select(df):
     anno_class = df['class'].values
     y_true = to_categorical(anno_class)
 
-    # Gets x data (gene expressions)
+    # Gets x data
     x_all = df.iloc[:, 0:-1].values
 
     # Note: the validation data used here is the same as the training since we are not

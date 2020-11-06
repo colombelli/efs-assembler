@@ -5,7 +5,8 @@ import efsassembler.kuncheva_index as ki
 from efsassembler import Hybrid
 
 
-heavy = True    # requires access to dm.bs_rankings
+heavy = True    # Requires access to dm.bs_rankings
+threshold_sensitive = True  # The threshold value may change the final aggregated ranking
 
 def aggregate(self, selector:Hybrid):
     
@@ -23,8 +24,8 @@ def aggregate(self, selector:Hybrid):
 
         for fs, ranking in enumerate(bs_rankings[bs]):
             reversed_ranking = ranking.iloc[::-1]
-            for gene in reversed_ranking.index: 
-                aggregated_ranking[gene] += (reversed_ranking.index.get_loc(gene)+1) * (fs_stabilities[fs]**5)
+            for feature in reversed_ranking.index: 
+                aggregated_ranking[feature] += (reversed_ranking.index.get_loc(feature)+1) * (fs_stabilities[fs]**5)
 
         final_rankings.append(
             build_df_and_correct_order(aggregated_ranking)
@@ -45,8 +46,8 @@ def get_normalize_stability(stability):
 
 def initialize_aggregated_ranking_dict(bs_rankings):
     aggregated_ranking = {}
-    for gene in list(bs_rankings[0][0].index):
-        aggregated_ranking[gene] = 0
+    for feature in list(bs_rankings[0][0].index):
+        aggregated_ranking[feature] = 0
     return aggregated_ranking
 
 
@@ -60,8 +61,8 @@ def get_fs_stabilities(threshold, bs_rankings):
         fs_rankings = []
         for bs in bs_rankings:
             df_ranking = bs_rankings[bs][fs]
-            lst_genes = list(df_ranking.index.values)
-            fs_rankings.append(lst_genes)
+            lst_features = list(df_ranking.index.values)
+            fs_rankings.append(lst_features)
         
         normalized_stb = get_normalize_stability(ki.get_kuncheva_index(fs_rankings, threshold=threshold))
         stabilities.append(normalized_stb)  

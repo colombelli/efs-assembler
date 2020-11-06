@@ -16,14 +16,14 @@ def select(df):
     fs = ReliefF(n_neighbors=k)
     fs.fit(data, labels)
 
-    genes = list(df.columns)
+    features = list(df.columns)
     data = {}
-    data['gene'] = []
+    data['features'] = []
     data['rank'] = []
-    for i, gene in enumerate(fs.top_features):
-        data['gene'].append(genes[gene])
+    for i, feature in enumerate(fs.top_features):
+        data['features'].append(features[feature])
         data['rank'].append(i+1)
 
-    rank = pd.DataFrame(data, columns=['rank']).set_index(pd.Index(data['gene']))
+    rank = pd.DataFrame(data, columns=['rank']).set_index(pd.Index(data['features']))
 
     return rank
