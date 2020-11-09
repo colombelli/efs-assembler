@@ -2,7 +2,7 @@ from efsassembler.Logger import Logger
 from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SELECTION_PATH
+from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_NAME, SELECTION_PATH
 
 class Homogeneous:
     
@@ -24,6 +24,7 @@ class Homogeneous:
     def __init_final_rankings_dict(self):
         for th in self.thresholds:
             self.final_rankings_dict[th] = []
+        self.final_rankings_dict[0] = []
         return
 
 
@@ -47,16 +48,25 @@ class Homogeneous:
 
         self.__set_rankings_to_aggregate(rankings)
         
-        file_path = output_path + AGGREGATED_RANK_FILE_NAME
-        for th in self.thresholds:
-            Logger.aggregating_rankings()
-            Logger.for_threshold(th)
-            self.current_threshold = th
-            aggregation = self.aggregator.aggregate(self)
-            self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
+        if self.aggregator.threshold_sensitive:
+            file_path = output_path + AGGREGATED_RANK_FILE_NAME
+            for th in self.thresholds:
+                Logger.aggregating_rankings()
+                Logger.for_threshold(th)
+                self.current_threshold = th
+                aggregation = self.aggregator.aggregate(self)
+                self.dm.save_encoded_ranking(aggregation, file_path+str(th)) 
+                if (not in_experiment) and (i != None):
+                    self.final_rankings_dict[th].append(aggregation)
 
+        else: 
+            file_path = output_path + SINGLE_RANK_FILE_NAME
+            Logger.aggregating_rankings()
+            aggregation = self.aggregator.aggregate(self)
+            self.dm.save_encoded_ranking(aggregation, file_path) 
             if (not in_experiment) and (i != None):
-                self.final_rankings_dict[th].append(aggregation)
+                self.final_rankings_dict[0].append(aggregation)  
+
         return
 
     

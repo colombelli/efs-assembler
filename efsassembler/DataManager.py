@@ -32,8 +32,8 @@ class DataManager:
         #self.r_df = None
         self.pd_df = None
         self.__load_dataset()
+        self.pd_df = self.pd_df.reset_index(drop=True)
         
-
 
         self.folds = None
         self.current_fold_iteration = 0
