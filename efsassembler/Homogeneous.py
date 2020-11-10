@@ -1,31 +1,16 @@
+from efsassembler.FSTechnique import FSTechnique
 from efsassembler.Logger import Logger
 from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
 from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_NAME, SELECTION_PATH
 
-class Homogeneous:
+class Homogeneous(FSTechnique):
     
     # fr_method: a single elemet list (to maintain coherence) whose element is a tuple: 
     # (script name, language which the script was written, .csv output name)
     def __init__(self, data_manager:DataManager, fr_method, aggregator, thresholds:list):
-
-        self.dm = data_manager
-        self.fr_method = FeatureRanker.generate_ranker_object(fr_method)[0]
-        self.aggregator = Aggregator(aggregator)
-        self.rankings_to_aggregate = None
-
-        self.thresholds = thresholds
-        self.current_threshold = None
-        self.final_rankings_dict = {}
-        self.__init_final_rankings_dict()
-
-
-    def __init_final_rankings_dict(self):
-        for th in self.thresholds:
-            self.final_rankings_dict[th] = []
-        self.final_rankings_dict[0] = []
-        return
+        super().__init__(data_manager, fr_method, thresholds, aggregator=aggregator)
 
 
     def hom_feature_selection(self, output_path, in_experiment=True):
@@ -46,7 +31,7 @@ class Homogeneous:
             bootstrap_data = self.dm.pd_df.iloc[bootstrap]
             rankings.append(self.fr_method.select(bootstrap_data, ranking_path, save_ranking=in_experiment))
 
-        self.__set_rankings_to_aggregate(rankings)
+        self._set_rankings_to_aggregate(rankings)
         
         if self.aggregator.threshold_sensitive:
             file_path = output_path + AGGREGATED_RANK_FILE_NAME
@@ -67,11 +52,6 @@ class Homogeneous:
             if (not in_experiment) and (i != None):
                 self.final_rankings_dict[0].append(aggregation)  
 
-        return
-
-    
-    def __set_rankings_to_aggregate(self, rankings):
-        self.rankings_to_aggregate = rankings
         return
 
 

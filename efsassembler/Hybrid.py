@@ -1,54 +1,27 @@
+from efsassembler.FSTechnique import FSTechnique
 from efsassembler.Logger import Logger
 from efsassembler.FeatureRanker import PyRanker, RRanker
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
-from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SELECTION_PATH
+from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_NAME, SELECTION_PATH
 
-class Hybrid:
+class Hybrid(FSTechnique):
     
     # fr_methods: a tuple (script name, language which the script was written, .rds output name)
     # thresholds: must be list with integer values
-    def __init__(self, data_manager:DataManager, fr_methods, 
+    def __init__(self, data_manager:DataManager, fr_methods:list, 
     first_aggregator, second_aggregator, thresholds:list):
 
-        self.dm = data_manager
-        self.thresholds = thresholds
-        self.current_threshold = None
-
-        self.fr_methods = self.__generate_ranker_object(fr_methods)
-        self.fst_aggregator = Aggregator(first_aggregator)
-        self.snd_aggregator = Aggregator(second_aggregator)
+        super().__init__(data_manager, fr_methods, thresholds, 
+                            fst_aggregator=first_aggregator, 
+                            snd_aggregator=second_aggregator)
 
         if self.fst_aggregator.heavy or self.snd_aggregator.heavy:
             self.hyb_feature_selection = self.hyb_feature_selection_heavy
         else:
             self.hyb_feature_selection = self.hyb_feature_selection_light
 
-        self.rankings_to_aggregate = None
-        self.final_rankings_dict = {}
-        self.__init_final_rankings_dict()
-            
-
         
-    def __generate_ranker_object(self, methods):
-        
-        fr_methods = []
-        for script, language, rds_name in methods:
-            if language == "python":
-                fr_methods.append(
-                    PyRanker(rds_name, script)
-                )
-            elif language == "r":
-                fr_methods.append(
-                    RRanker(rds_name, script)
-                )
-        return fr_methods
-
-
-    def __init_final_rankings_dict(self):
-        for th in self.thresholds:
-            self.final_rankings_dict[th] = []
-        return
 
 
 #################################################################################################################################
@@ -80,7 +53,7 @@ class Hybrid:
                     fr_method.select(bootstrap_data, ranking_path, save_ranking=in_experiment)
                 )
             
-            self.__set_rankings_to_aggregate(fst_layer_rankings)
+            self._set_rankings_to_aggregate(fst_layer_rankings)
             self.__aggregate_light_fst_layer(j, snd_layer_rankings, in_experiment)
         
         self.__aggregate_light_snd_layer(snd_layer_rankings, in_experiment)
@@ -96,9 +69,9 @@ class Hybrid:
             file_path = output_path + AGGREGATED_RANK_FILE_NAME
         
 
+        Logger.aggregating_n_level_rankings(1)
         for th in self.thresholds:
             Logger.for_threshold(th)
-            Logger.aggregating_n_level_rankings(1)
             self.current_threshold = th
             fs_aggregation = self.fst_aggregator.aggregate(self)
             if in_experiment:
@@ -113,25 +86,36 @@ class Hybrid:
 
         if in_experiment:
             output_path = self.dm.get_output_path(fold_iteration=i)
-            file_path = output_path + AGGREGATED_RANK_FILE_NAME
+            file_path = output_path
 
         elif i != None: # Final Selection balanced
-            file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/" + AGGREGATED_RANK_FILE_NAME
+            file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/"
         
         else:  # Final Selection on the whole dataset
-            file_path = self.dm.results_path + SELECTION_PATH + AGGREGATED_RANK_FILE_NAME
+            file_path = self.dm.results_path + SELECTION_PATH
 
-        for th in self.thresholds:
-            Logger.for_threshold(th)
+        if self.threshold_sensitive:
             Logger.aggregating_n_level_rankings(2)
-            self.current_threshold = th
-            self.__set_rankings_to_aggregate(snd_layer_rankings[th])
+            file_path += AGGREGATED_RANK_FILE_NAME
+            for th in self.thresholds:
+                Logger.for_threshold(th)
+                self.current_threshold = th
+                self._set_rankings_to_aggregate(snd_layer_rankings[th])
+                fs_aggregation = self.snd_aggregator.aggregate(self)
+                self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
+                if (not in_experiment) and (i != None):
+                    self.final_rankings_dict[th].append(fs_aggregation)
+        
+        
+        else:   # if it's not threshold senstive, just use any threshold
+            file_path += SINGLE_RANK_FILE_NAME
+            Logger.aggregating_n_level_rankings(2)
+            self._set_rankings_to_aggregate(snd_layer_rankings[self.thresholds[0]])
             fs_aggregation = self.snd_aggregator.aggregate(self)
-            self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
-
+            self.dm.save_encoded_ranking(fs_aggregation, file_path)
             if (not in_experiment) and (i != None):
-                self.final_rankings_dict[th].append(fs_aggregation)
-
+                self.final_rankings_dict[0].append(fs_aggregation)
+        
         return
 
 
@@ -177,9 +161,10 @@ class Hybrid:
     def __aggregate_heavy(self, in_experiment=True):
 
         i = self.dm.current_fold_iteration
+        Logger.aggregating_n_level_rankings(1)
+        Logger.aggregating_n_level_rankings(2)
         for th in self.thresholds:
             Logger.for_threshold(th)
-            Logger.aggregating_n_level_rankings(1)
             self.current_threshold = th
 
             if self.fst_aggregator.heavy:
@@ -194,7 +179,6 @@ class Hybrid:
                     self.dm.save_encoded_ranking(fs_aggregation, file_path)
             
             snd_layer_rankings = fs_aggregations
-            Logger.aggregating_n_level_rankings(2)
 
             if in_experiment:
                 file_path = self.dm.get_output_path(fold_iteration=i) + \
@@ -208,7 +192,7 @@ class Hybrid:
                 file_path = self.dm.results_path + SELECTION_PATH + \
                         AGGREGATED_RANK_FILE_NAME + str(th) 
 
-            self.__set_rankings_to_aggregate(snd_layer_rankings)
+            self._set_rankings_to_aggregate(snd_layer_rankings)
             final_ranking = self.snd_aggregator.aggregate(self)
             self.dm.save_encoded_ranking(final_ranking, file_path)
 
@@ -222,16 +206,11 @@ class Hybrid:
         fs_aggregations = []
         for bs in self.dm.bs_rankings:
             rankings = self.dm.bs_rankings[bs]
-            self.__set_rankings_to_aggregate(rankings)
+            self._set_rankings_to_aggregate(rankings)
             aggregation = self.fst_aggregator.aggregate(self)
             fs_aggregations.append(aggregation)
         
         return fs_aggregations
-
-
-    def __set_rankings_to_aggregate(self, rankings):
-        self.rankings_to_aggregate = rankings
-        return
 
 
 #################################################################################################################################

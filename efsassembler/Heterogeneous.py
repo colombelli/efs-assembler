@@ -1,31 +1,17 @@
+from efsassembler.FSTechnique import FSTechnique
 from efsassembler.Logger import Logger
 from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.Aggregator import Aggregator
 from efsassembler.DataManager import DataManager
 from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_NAME, SELECTION_PATH
 
-class Heterogeneous:
-    
-    # fr_methods: a tuple (script name, language which the script was written, .rds output name)
-    def __init__(self, data_manager:DataManager, fr_methods, aggregator, thresholds:list):
+class Heterogeneous(FSTechnique):
 
-        self.dm = data_manager
-        self.fr_methods = FeatureRanker.generate_ranker_object(fr_methods)
-        self.aggregator = Aggregator(aggregator)
-        self.rankings_to_aggregate = None
-
-        self.thresholds = thresholds
-        self.current_threshold = None
-        self.final_rankings_dict = {}
-        self.__init_final_rankings_dict()
-
-
-    def __init_final_rankings_dict(self):
-        for th in self.thresholds:
-            self.final_rankings_dict[th] = []
-        self.final_rankings_dict[0] = []
-        return
-
+    # fr_methods: a list whose elements are tuples with the following format: 
+    # (script name, language which the script was written, .csv output name)
+    def __init__(self, data_manager:DataManager, fr_methods:list, aggregator, thresholds:list):
+        super().__init__(data_manager, fr_methods, thresholds, aggregator=aggregator)
+        
 
     def het_feature_selection(self, df, output_path, in_experiment=True):
         
@@ -35,7 +21,7 @@ class Heterogeneous:
                 fr_method.select(df, output_path, save_ranking=in_experiment)
             )
         
-        self.__set_rankings_to_aggregate(rankings)
+        self._set_rankings_to_aggregate(rankings)
 
         if self.aggregator.threshold_sensitive:
             file_path = output_path + AGGREGATED_RANK_FILE_NAME
@@ -57,12 +43,6 @@ class Heterogeneous:
                 self.final_rankings_dict[0].append(aggregation)
 
         return
-
-
-    def __set_rankings_to_aggregate(self, rankings):
-        self.rankings_to_aggregate = rankings
-        return
-
 
 
     def select_features_experiment(self):

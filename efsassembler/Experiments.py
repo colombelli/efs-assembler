@@ -161,7 +161,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
         
-        final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
+        final_selection = FinalSelection(ensemble, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -198,7 +198,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
+        final_selection = FinalSelection(ensemble, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -235,7 +235,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(ensemble, dm, self.final_selection_balanced)
+        final_selection = FinalSelection(ensemble, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -272,7 +272,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(feature_ranker, dm, self.final_selection_balanced)
+        final_selection = FinalSelection(feature_ranker, self.final_selection_balanced)
         final_selection.start()
 
         Logger.end_experiment_message()

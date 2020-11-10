@@ -1,32 +1,20 @@
+from efsassembler.FSTechnique import FSTechnique
 from efsassembler.Logger import Logger
 from efsassembler.FeatureRanker import FeatureRanker, PyRanker, RRanker
 from efsassembler.DataManager import DataManager
 from efsassembler.Constants import SINGLE_RANK_FILE_NAME, SELECTION_PATH
 
-class SingleFR:
+class SingleFR(FSTechnique):
     
     # fr_method: a single elemet list (to maintain coherence) whose element is a tuple: 
     # (script name, language which the script was written, .csv output name)
     def __init__(self, data_manager:DataManager, fr_method, thresholds:list):
-
-        self.dm = data_manager
-        self.fr_method = FeatureRanker.generate_ranker_object(fr_method)[0]
-        self.thresholds = thresholds
-        self.final_rankings_dict = {}
-        self.__init_final_rankings_dict()
-
-
-    def __init_final_rankings_dict(self):
-        for th in self.thresholds:
-            self.final_rankings_dict[th] = []
-        self.final_rankings_dict[0] = []
-        return
+        super().__init__(data_manager, fr_method, thresholds)
 
 
     # In order to reuse Evaluator class, we need an SINGLE_RANK_FILE_NAME
     # accessible inside each fold iteration folder, so we simply resave the only
     # ranking we have with the appropriate name
-
     def select_features_experiment(self):
 
         for i in range(self.dm.num_folds):
@@ -45,7 +33,6 @@ class SingleFR:
             self.dm.save_encoded_ranking(ranking, file_path) 
             
         return
-
 
 
     def select_features(self, balanced=True):
