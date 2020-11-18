@@ -97,7 +97,7 @@ class Logger:
 
     @classmethod
     def integer_number_of_thresholds(self, integer_thresholds):
-        log = "Number of features to select given the threshold percentages: " + str(integer_thresholds)
+        log = "Number of features to select: " + str(integer_thresholds)
         Logger.handler.info(log)
         return
 

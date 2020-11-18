@@ -160,7 +160,7 @@ class Hybrid(FSTechnique):
 
     def __aggregate_heavy(self, in_experiment=True):
         Logger.aggregating_n_level_rankings(str(1) + " and " + str(2))
-        if self.aggregator.threshold_sensitive: 
+        if self.threshold_sensitive: 
             self.__aggregate_heavy_th_sensitive(in_experiment)
         else:
             self.__aggregate_heavy_th_nonsensitive(in_experiment)
@@ -191,7 +191,7 @@ class Hybrid(FSTechnique):
 
             if (not in_experiment) and (i != None):
                 self.final_rankings_dict[th].append(final_ranking)
-            return        
+        return        
 
 
     def __aggregate_heavy_th_nonsensitive(self, in_experiment):

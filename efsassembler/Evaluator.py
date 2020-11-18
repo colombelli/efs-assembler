@@ -25,7 +25,6 @@ class Evaluator:
         self.final_ranks = None     # If the ranks are threshold sensitive, than they will be loaded
                                     # at each iteration to save memory
         self.is_agg_th_sensible = None
-        self.__infer_if_agg_th_sensible()
 
         self.current_threshold = None
         self.classifier = None
@@ -178,6 +177,7 @@ class Evaluator:
         self.dm.set_seed()  # reset seed internal state allowing reproducibility for the
                             # evaluation process alone without performing feature selection 
         
+        self.__infer_if_agg_th_sensible()
         if not self.is_agg_th_sensible:
             self.__load_final_ranks()
 
