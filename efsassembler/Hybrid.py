@@ -159,10 +159,16 @@ class Hybrid(FSTechnique):
 
 
     def __aggregate_heavy(self, in_experiment=True):
+        Logger.aggregating_n_level_rankings(str(1) + " and " + str(2))
+        if self.aggregator.threshold_sensitive: 
+            self.__aggregate_heavy_th_sensitive(in_experiment)
+        else:
+            self.__aggregate_heavy_th_nonsensitive(in_experiment)
+        return
 
+
+    def __aggregate_heavy_th_sensitive(self, in_experiment):
         i = self.dm.current_fold_iteration
-        Logger.aggregating_n_level_rankings(1)
-        Logger.aggregating_n_level_rankings(2)
         for th in self.thresholds:
             Logger.for_threshold(th)
             self.current_threshold = th
@@ -170,39 +176,59 @@ class Hybrid(FSTechnique):
             if self.fst_aggregator.heavy:
                 fs_aggregations = self.fst_aggregator.aggregate(self)
             else:
-                fs_aggregations = self.__fst_aggregate_not_heavy(th)
+                fs_aggregations = self.__fst_aggregate_not_heavy()
 
             if in_experiment: 
                 for bs_num, fs_aggregation in enumerate(fs_aggregations):
                     output_path = self.dm.get_output_path(i, bs_num)
                     file_path = output_path + AGGREGATED_RANK_FILE_NAME + str(th)
                     self.dm.save_encoded_ranking(fs_aggregation, file_path)
-            
-            snd_layer_rankings = fs_aggregations
 
-            if in_experiment:
-                file_path = self.dm.get_output_path(fold_iteration=i) + \
-                                AGGREGATED_RANK_FILE_NAME + str(th) 
-           
-            elif i != None:
-                file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/" + \
-                        AGGREGATED_RANK_FILE_NAME + str(th) 
-
-            else:
-                file_path = self.dm.results_path + SELECTION_PATH + \
-                        AGGREGATED_RANK_FILE_NAME + str(th) 
-
-            self._set_rankings_to_aggregate(snd_layer_rankings)
+            file_path = self.__get_agg_ranking_path(AGGREGATED_RANK_FILE_NAME + str(th), in_experiment)
+            self._set_rankings_to_aggregate(fs_aggregations)
             final_ranking = self.snd_aggregator.aggregate(self)
             self.dm.save_encoded_ranking(final_ranking, file_path)
 
             if (not in_experiment) and (i != None):
                 self.final_rankings_dict[th].append(final_ranking)
+            return        
+
+
+    def __aggregate_heavy_th_nonsensitive(self, in_experiment):
+        i = self.dm.current_fold_iteration
+        if self.fst_aggregator.heavy:
+            fs_aggregations = self.fst_aggregator.aggregate(self)
+        else:
+            fs_aggregations = self.__fst_aggregate_not_heavy()
+
+        if in_experiment: 
+            for bs_num, fs_aggregation in enumerate(fs_aggregations):
+                output_path = self.dm.get_output_path(i, bs_num)
+                file_path = output_path + SINGLE_RANK_FILE_NAME
+                self.dm.save_encoded_ranking(fs_aggregation, file_path)
+
+        file_path = self.__get_agg_ranking_path(SINGLE_RANK_FILE_NAME, in_experiment)
+        self._set_rankings_to_aggregate(fs_aggregations)
+        final_ranking = self.snd_aggregator.aggregate(self)
+        self.dm.save_encoded_ranking(final_ranking, file_path)
+
+        if (not in_experiment) and (i != None):
+            self.final_rankings_dict[0].append(final_ranking)
         return
 
 
-    def __fst_aggregate_not_heavy(self, th):
+    def __get_agg_ranking_path(self, file_name, in_experiment):
+        i = self.dm.current_fold_iteration
+        if in_experiment:
+            file_path = self.dm.get_output_path(fold_iteration=i) + file_name 
+        elif i != None:
+            file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/" + file_name
+        else:
+            file_path = self.dm.results_path + SELECTION_PATH + file_name
+        return file_path
 
+
+    def __fst_aggregate_not_heavy(self):
         fs_aggregations = []
         for bs in self.dm.bs_rankings:
             rankings = self.dm.bs_rankings[bs]
