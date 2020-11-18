@@ -5,7 +5,7 @@ import efsassembler.kuncheva_index as ki
 from efsassembler import Hybrid
 
 
-heavy = True    # Requires access to dm.bs_rankings
+heavy = True    # Requires access to dm.bs_rankings and compromises of aggregating first layer rankings
 threshold_sensitive = True  # The threshold value may change the final aggregated ranking
 
 def aggregate(self, selector:Hybrid):

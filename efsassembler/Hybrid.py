@@ -21,6 +21,7 @@ class Hybrid(FSTechnique):
         else:
             self.hyb_feature_selection = self.hyb_feature_selection_light
 
+
         
 
 
@@ -31,9 +32,8 @@ class Hybrid(FSTechnique):
     def hyb_feature_selection_light(self, in_experiment=True):
         
         ranking_path = None
-        snd_layer_rankings = {}
         i = self.dm.current_fold_iteration
-
+        snd_layer_rankings = {0: []}
         for th in self.thresholds:
             snd_layer_rankings[th] = []
 
@@ -63,21 +63,24 @@ class Hybrid(FSTechnique):
     def __aggregate_light_fst_layer(self, bootstrap_num, snd_layer_rankings, in_experiment=True):
         
         fold_iteration = self.dm.current_fold_iteration
-
-        if in_experiment:
-            output_path = self.dm.get_output_path(fold_iteration, bootstrap_num)
-            file_path = output_path + AGGREGATED_RANK_FILE_NAME
-        
+        output_path = self.dm.get_output_path(fold_iteration, bootstrap_num)        
 
         Logger.aggregating_n_level_rankings(1)
-        for th in self.thresholds:
-            Logger.for_threshold(th)
-            self.current_threshold = th
+        if self.fst_aggregator.threshold_sensitive:
+            file_path = output_path + AGGREGATED_RANK_FILE_NAME
+            for th in self.thresholds:
+                Logger.for_threshold(th)
+                self.current_threshold = th
+                fs_aggregation = self.fst_aggregator.aggregate(self)
+                if in_experiment:
+                    self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
+                snd_layer_rankings[th].append(fs_aggregation)
+        else:
+            file_path = output_path + SINGLE_RANK_FILE_NAME
             fs_aggregation = self.fst_aggregator.aggregate(self)
             if in_experiment:
-                self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
-            snd_layer_rankings[th].append(fs_aggregation)
-
+                self.dm.save_encoded_ranking(fs_aggregation, file_path)
+            snd_layer_rankings[0].append(fs_aggregation)
         return
 
     
@@ -87,30 +90,31 @@ class Hybrid(FSTechnique):
         if in_experiment:
             output_path = self.dm.get_output_path(fold_iteration=i)
             file_path = output_path
-
         elif i != None: # Final Selection balanced
             file_path = self.dm.results_path + SELECTION_PATH + str(i) + "/"
-        
         else:  # Final Selection on the whole dataset
             file_path = self.dm.results_path + SELECTION_PATH
 
         if self.threshold_sensitive:
             Logger.aggregating_n_level_rankings(2)
             file_path += AGGREGATED_RANK_FILE_NAME
+            self._set_rankings_to_aggregate(snd_layer_rankings[0])  # If the first aggregator was not th sensitive
             for th in self.thresholds:
                 Logger.for_threshold(th)
                 self.current_threshold = th
-                self._set_rankings_to_aggregate(snd_layer_rankings[th])
+                # If the first aggregator was th sensitive, then rankings must be set to each th of the loop
+                if self.fst_aggregator.threshold_sensitive: 
+                    self._set_rankings_to_aggregate(snd_layer_rankings[th])
                 fs_aggregation = self.snd_aggregator.aggregate(self)
                 self.dm.save_encoded_ranking(fs_aggregation, file_path+str(th))
                 if (not in_experiment) and (i != None):
                     self.final_rankings_dict[th].append(fs_aggregation)
         
         
-        else:   # if it's not threshold senstive, just use any threshold
+        else:   # If both aggregators are not threshold sensitive
             file_path += SINGLE_RANK_FILE_NAME
             Logger.aggregating_n_level_rankings(2)
-            self._set_rankings_to_aggregate(snd_layer_rankings[self.thresholds[0]])
+            self._set_rankings_to_aggregate(snd_layer_rankings[0])
             fs_aggregation = self.snd_aggregator.aggregate(self)
             self.dm.save_encoded_ranking(fs_aggregation, file_path)
             if (not in_experiment) and (i != None):
