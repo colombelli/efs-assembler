@@ -1,9 +1,10 @@
 import pandas as pd
+import importlib
+import sys
+import os
 import pickle
 import glob
 from pathlib import Path
-from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier as GBC
 from sklearn import metrics
 import numpy as np
 import efsassembler.kuncheva_index as ki
@@ -14,7 +15,7 @@ from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_N
 class Evaluator:
 
     # th_in_fraction: bool  => if the threshold values are fractions or integers
-    def __init__(self, data_manager:DataManager, thresholds, th_in_fraction):
+    def __init__(self, data_manager:DataManager, thresholds, th_in_fraction, classifier_file:str):
 
         self.dm = data_manager
         
@@ -27,7 +28,8 @@ class Evaluator:
         self.is_agg_th_sensible = None
 
         self.current_threshold = None
-        self.classifier = None
+        self.classifier_class = self.__get_classifier_class(classifier_file) # Used to reset classifier object
+        self.classifier = None  # Used as the classifier object
         self.prediction_performances = None
         self.stabilities = None
         self.rankings = None
@@ -37,6 +39,8 @@ class Evaluator:
         self.testing_y = None
 
         self.confusion_matrices = []
+
+
         
 
     
@@ -91,6 +95,26 @@ class Evaluator:
         return updated_int_thresholds, frac_thresholds
 
 
+    def __get_classifier_class(self, file):
+
+        to_import = "efsassembler.classifiers."
+        if self.__check_for_script_file(file):
+            to_import += "user_algorithms."
+        return getattr(importlib.import_module(to_import), "Classifier")
+
+    
+    def __check_for_script_file(self, file):
+        pkgdir = sys.modules['efsassembler'].__path__[0] + "/"
+        user_alg_path = pkgdir + "classifiers/user_algorithms/"
+        user_script = os.path.isfile(user_alg_path + file + ".py")
+
+        if user_script:
+            return True
+        else:
+            return False
+
+
+
     def __infer_if_agg_th_sensible(self):
 
         file_name = Path(self.dm.results_path + "fold_1/" + \
@@ -115,8 +139,7 @@ class Evaluator:
 
 
     def __reset_classifier(self):
-        #self.classifier = SVC(gamma='auto', probability=True)
-        self.classifier = GBC()
+        self.classifier = self.classifier_class()
         return
     
     def __reset_confusion_matrices(self):

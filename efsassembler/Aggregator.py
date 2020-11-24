@@ -39,7 +39,7 @@ class Aggregator:
     def __is_heavy_required(self):
         try:
             if self.user_script:
-                return importlib.import_module("efsassembler.aggregators.user_algorithms" + \
+                return importlib.import_module("efsassembler.aggregators.user_algorithms." + \
                                                 self.aggregation_method).heavy
             else:
                 return importlib.import_module("efsassembler.aggregators." + \
@@ -51,7 +51,7 @@ class Aggregator:
     def __is_threshold_sensitive(self):
         try:
             if self.user_script:
-                return importlib.import_module("efsassembler.aggregators.user_algorithms" + \
+                return importlib.import_module("efsassembler.aggregators.user_algorithms." + \
                                                 self.aggregation_method).threshold_sensitive
             else:
                 return importlib.import_module("efsassembler.aggregators." + \
@@ -63,7 +63,7 @@ class Aggregator:
     # selector: a Hybrid/Heterogeneous/Homogeneous object
     def aggregate(self, selector): 
         if self.user_script:
-            agg_foo = importlib.import_module("efsassembler.aggregators.user_algorithms" + \
+            agg_foo = importlib.import_module("efsassembler.aggregators.user_algorithms." + \
                                                 self.aggregation_method).aggregate
         else:
             agg_foo = importlib.import_module("efsassembler.aggregators." + \
