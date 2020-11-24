@@ -95,27 +95,28 @@ class Experiments:
                 int_seed = round(int(exp["seed"]))
                 
                 ths = exp["thresholds"]
+                classifier_file = exp["classifier"]
 
                 if exp["type"] == 'sin':
                     self.perform_selection_single(dataset_path, complete_results_path, exp["rankers"],
-                                                    int_folds, int_seed, ths)
+                                                    int_folds, int_seed, ths, classifier_file)
 
                 elif exp["type"] == 'hom':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hom(dataset_path, complete_results_path,
                                                 exp["rankers"], exp["aggregators"][0], int_folds,
-                                                int_bootstraps, int_seed, ths)
+                                                int_bootstraps, int_seed, ths, classifier_file)
 
                 elif exp["type"] == 'het':
                     self.perform_selection_het(dataset_path, complete_results_path,
                                                 exp["rankers"], exp["aggregators"][0], int_folds,
-                                                int_seed, ths)
+                                                int_seed, ths, classifier_file)
                     
                 elif exp["type"] == 'hyb':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hyb(dataset_path, complete_results_path, exp["rankers"], 
                                                 exp["aggregators"][0], exp["aggregators"][1], 
-                                                int_folds, int_bootstraps, int_seed, ths)
+                                                int_folds, int_bootstraps, int_seed, ths, classifier_file)
         return
 
 
@@ -133,7 +134,7 @@ class Experiments:
 
 
     def perform_selection_hyb(self, dataset_path, results_path, rankers, aggregator1, aggregator2,
-                                num_folds, num_bootstraps, seed, ths):
+                                num_folds, num_bootstraps, seed, ths, classifier_file):
         
         str_aggregators = [aggregator1, aggregator2]
         str_rankers = [i[0] for i in rankers]
@@ -144,7 +145,7 @@ class Experiments:
         dm.create_results_dir()
         dm.init_data_folding_process()
 
-        ev = Evaluator(dm, ths, False)
+        ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers, str_aggregators)
         ensemble = Hybrid(dm, rankers, aggregator1, aggregator2, ths)
 
@@ -169,7 +170,7 @@ class Experiments:
 
 
     def perform_selection_het(self, dataset_path, results_path, rankers, 
-                                aggregator, num_folds, seed, ths):
+                                aggregator, num_folds, seed, ths, classifier_file):
 
         str_aggregators = [aggregator]
         str_rankers = [i[0] for i in rankers]
@@ -181,7 +182,7 @@ class Experiments:
         dm.create_results_dir()
         dm.init_data_folding_process()
         
-        ev = Evaluator(dm, ths, False)
+        ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers, str_aggregators)
         ensemble = Heterogeneous(dm, rankers, aggregator, ths)
 
@@ -207,7 +208,7 @@ class Experiments:
     
 
     def perform_selection_hom(self, dataset_path, results_path, ranker, 
-                                aggregator, num_folds, num_bootstraps, seed, ths):
+                                aggregator, num_folds, num_bootstraps, seed, ths, classifier_file):
 
         str_aggregators = [aggregator]
         str_rankers = [ranker[0][0]]
@@ -218,7 +219,7 @@ class Experiments:
         dm.create_results_dir()
         dm.init_data_folding_process()
 
-        ev = Evaluator(dm, ths, False)
+        ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers, str_aggregators)
         ensemble = Homogeneous(dm, ranker, aggregator, ths)
 
@@ -244,7 +245,7 @@ class Experiments:
     
 
     def perform_selection_single(self, dataset_path, results_path, 
-                                ranker, num_folds, seed, ths):
+                                ranker, num_folds, seed, ths, classifier_file):
 
         num_bootstraps = 0
         str_rankers = [ranker[0][0]]    # because ranker is always a list, even when it have only one element
@@ -255,7 +256,7 @@ class Experiments:
         dm.create_results_dir()
         dm.init_data_folding_process()
 
-        ev = Evaluator(dm, ths, False)
+        ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers)
         feature_ranker = SingleFR(dm, ranker, ths)
 

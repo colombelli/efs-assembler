@@ -15,7 +15,7 @@ from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_N
 class Evaluator:
 
     # th_in_fraction: bool  => if the threshold values are fractions or integers
-    def __init__(self, data_manager:DataManager, thresholds, th_in_fraction, classifier_file:str):
+    def __init__(self, data_manager:DataManager, thresholds, classifier_file:str, th_in_fraction=False):
 
         self.dm = data_manager
         
