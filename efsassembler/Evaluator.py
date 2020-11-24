@@ -100,6 +100,7 @@ class Evaluator:
         to_import = "efsassembler.classifiers."
         if self.__check_for_script_file(file):
             to_import += "user_algorithms."
+        to_import += file
         return getattr(importlib.import_module(to_import), "Classifier")
 
     
