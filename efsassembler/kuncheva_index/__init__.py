@@ -37,6 +37,9 @@ def get_kuncheva_index(subsets: list, n=None, threshold=None):
     if th > n:
         raise Exception('Provided threshold greater than ranking length (' + str(n) + ')')
     
+    elif th == n:
+        return 1
+
     else:
         if threshold is not None:
             th = threshold
