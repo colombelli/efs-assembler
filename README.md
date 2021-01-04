@@ -14,7 +14,7 @@
 - [Usage for running experiments](#usage-for-running-experiments)
     - [Example](#experiments-example)
 - [Datasets expected format](#datasets-expected-format)
-- [Results folder structure](##results-folder-structure)
+- [Results folder structure](#results-folder-structure)
 
 ## Introduction
 
