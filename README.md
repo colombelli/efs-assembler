@@ -14,7 +14,7 @@
 - [Usage for running experiments](#usage-for-running-experiments)
     - [Example](#experiments-example)
 - [Datasets expected format](#datasets-expected-format)
-
+- [Results folder structure](##results-folder-structure)
 
 ## Introduction
 
@@ -150,3 +150,24 @@ exp.run()
 The above example will perform a hyb experiment and a het experiment on datasets *one.csv* and *two.csv* (4 experiments in total); a hom experiment and a sin experiment on dataset *one.csv* (2 experiments in total); thus, 6 experiments will be executed in total with ```exp.run()``` call. 
 
 ## Datasets expected format
+
+The datasets are expected to:
+* be a .csv or .rds file
+* represent each sample on each row
+* represent each feature on each column
+* have the first column as the index name for each sample
+* have the last column named exactly **class**
+* each value on the class column must be either **1** for positive observations or **0** for negative/control observations
+* have only numeric features without NaN/missing values
+
+For example:
+|   | feature1  | feature2  | feature3  | feature4  | feature5  | class  |
+|---|---|---|---|---|---|---|
+| sample1  | 2.357  | 10.124  | -1.733  | 5  | 1.553  | 0  |
+| sample2  | 2.823  | 11.3274  | 0.001  | 2  | 1.287  | 1  |
+| sample3  | 1.7343  | 11.8922  | -0.736  | 2  | 1.5981  | 1  |
+| sample4  | 2.568  | 9.476  | -2.0012  | 6  | 1.9988  | 0  |
+| sample5  | 1.871  | 11.046  | -0.8375  | 1  | 1.3094  | 1  |
+
+
+## Results folder structure
