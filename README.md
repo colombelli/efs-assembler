@@ -3,6 +3,19 @@
 ![](https://img.shields.io/badge/python-v3.8-blue)
 ![](https://img.shields.io/badge/R-v4.0-red)
 
+## Summary
+
+- [Introduction](#introduction)
+    - [Feature Selection algorithms](#feature-selection-algorithms)
+    - [Aggregation algorithms](#aggregation-algorithms)
+    - [Classification algorithms](#classification-algorithms)
+    - [Collected metrics](#collected-metrics)
+- [Installation](#installation)
+- [Usage for running experiments](#usage-for-running-experiments)
+    - [Example](#experiments-example)
+- [Datasets expected format](#datasets-expected-format)
+
+
 ## Introduction
 
 The efs-assembler is a Python package integrated with R for performing ensemble feature selection experiments in binary classification problems. It is high flexible and allows the user to add different algorithms of feature selection (including support for R language), aggregation and also classification, offering options to perform stratified cross validation with downsampling and collect various performance metrics.
@@ -74,7 +87,7 @@ The expected type of input for the ```experiments_list``` object is a list of di
 * ```"seed"```: an integer representing the seed for reproducibility, e.g., ```42```
 * ```"folds"```: an integer representing the number of folds for the stratified cross-validation, e.g., ```10```
 * ```"classifier"```: either ```"gbm"``` or ```"svm"``` for provided classification algorithms
-* ```"datasets"```: a list with dataset paths that are going to be exposed to the experiment, e.g., ```["data/set/one.csv", "data/set/two.rds"]```. The accepted file types for the datasets are .csv and .rds. Additional information about the expected dataset format is given in the section [link section].
+* ```"datasets"```: a list with dataset paths that are going to be exposed to the experiment, e.g., ```["data/set/one.csv", "data/set/two.rds"]```. The accepted file types for the datasets are .csv and .rds. Additional information about the expected dataset format is given on [this section](#datasets-expected-format).
 * ```"rankers"```: a list with the feature selection algorithms to be used (even in "sin" and "hom" experiments a list is expected). The feature selection algorithms are represented by a tuple in the format ("file_name", "language", "rank_file_name_to_use_for_saving_their_result"), e.g., ```[("reliefF", "python", "rf"), ("geoDE", "python", "gd"), ("gain-ratio", "r", "gr"), ("symmetrical-uncertainty", "r", "su"), ("wx", "python", "wx")]```. Those are the current available algorithms. If more than one is given for a "sin" or "hom" experiment, the first algorithm will be used.
 
 For **"hyb"**, **"het"** and **"hom"** experiments:
@@ -83,7 +96,7 @@ For **"hyb"**, **"het"** and **"hom"** experiments:
 For **"hyb"** and **"hom"** experiments:
 * ```"bootstraps"```: an integer representing the number of bootstraps to be sampled, e.g., ```50```
 
-#### Example
+#### <a name="experiments-example">Example</a>
 ```python
 from efsassembler import Experiments
 
@@ -136,4 +149,4 @@ exp.run()
 
 The above example will perform a hyb experiment and a het experiment on datasets *one.csv* and *two.csv* (4 experiments in total); a hom experiment and a sin experiment on dataset *one.csv* (2 experiments in total); thus, 6 experiments will be executed in total with ```exp.run()``` call. 
 
-## Datasets' expected format
+## Datasets expected format
