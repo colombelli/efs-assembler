@@ -22,6 +22,11 @@ class Logger:
         return
 
     @classmethod
+    def end_feature_extraction_message(self):
+        Logger.handler.info("Feature extraction finished!")
+        return
+
+    @classmethod
     def decoding_dataframe(self):
         Logger.handler.info("Decoding dataframe")
         return
@@ -174,4 +179,9 @@ class Logger:
     @classmethod
     def balanced_final_selection_not_specified(self):
         Logger.handler.info("'balanced_final_selection' parameter not specified, assuming True.")
+        return
+
+    @classmethod
+    def balanced_selection_not_specified(self):
+        Logger.handler.info("'balanced_selection' parameter not specified, assuming True.")
         return

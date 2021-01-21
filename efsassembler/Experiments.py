@@ -22,12 +22,13 @@ class Experiments:
         {
             "type": <experiment type>,
             "seed": <int>,
-            "thresholds": [<int for threshold1>, <int for threshold2>, ... , <int for thresholdn>]
+            "thresholds": [<int for threshold1>, <int for threshold2>, ... , <int for thresholdn>],
             "folds": <int number of folds for the StratifiedKFold cross-validation>,
             "undersampling": <bool indicating if undersampling is to be applied in the stratified cv>,
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
             "aggregators": [<aggregator1 object>, <aggregator2 object>],
             "rankers": [<ranker1 object>, <ranker2 object>, ..., <rankern object>],
+            "classifier": "classifier_model_file_name",   --> see ./classifiers/ folder. currently available: "gbc" and "svm"
             "datasets": [<path to dataset1>, <path to dataset2>, ..., <path to dataset n>],
             "balanced_final_selection": <bool indicating if final feature selection is to be applied in balanced folds> 
         }
@@ -44,7 +45,7 @@ class Experiments:
         <ranker object>:
             a tuple: ("ranker_method_file_name", <programming language object>, "rank_file_name.rds")
 
-        <programming language object>
+        <programming language object>:
             either "python" or "r"
 
 

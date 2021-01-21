@@ -21,9 +21,10 @@ class FinalSelection:
         self.dm = self.selection_technique.dm
 
 
-    def start(self):
+    def start(self, skip_encoding=False):
         Logger.encoding_dataset()
-        self.dm.encode_main_dm_df()
+        if not skip_encoding:
+            self.dm.encode_main_dm_df()
         self.dm.compute_data_folds_final_selection()
         self.create_selection_dirs()
         self.selection_technique.select_features(self.balanced)
