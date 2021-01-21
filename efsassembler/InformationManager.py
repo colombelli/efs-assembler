@@ -54,15 +54,17 @@ class InformationManager:
 
     def __create_initial_file_info(self):
         
-        title = TITLE_INFO_FILE
         dataset = DATASET_USED + self.dm.file_path
         seed = SEED_INFO_FILE + str(self.dm.seed)
         design = DESIGN_INFO_FILE + self.design
         num_folds = NUM_FOLDS_INFO_FILE + str(self.dm.num_folds)
+        
+        if not self.dm.num_folds: #then it's a simple Feature Extraction and not an Experiment (with cross-validation and classification)
+            lines = [TITLE_INFO_FILE_EXTRACTION, dataset, seed, design]
+        else:
+            lines = [TITLE_INFO_FILE_EXPERIMENT, dataset, seed, design, num_folds]
 
-        lines = [title, dataset, seed, design, num_folds]
         self.info_txt_lines = lines + self.info_txt_lines
-
         self.__save_info_file()
         return        
 

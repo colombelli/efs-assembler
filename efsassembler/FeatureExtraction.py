@@ -17,10 +17,10 @@ import rpy2.robjects.packages as rpackages
 class FeatureExtraction:
 
     """
-        configuration object should be a list of dictionaries in the following format:
+        extraction_cfgs object should be a list of dictionaries in the following format:
 
         {
-            "type": <experiment type>,
+            "type": <extraction type>,
             "seed": <int>,
             "thresholds": [<int for threshold1>, <int for threshold2>, ... , <int for thresholdn>],
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
@@ -30,7 +30,7 @@ class FeatureExtraction:
             "balanced_selection": <bool indicating if feature selection is to be applied in balanced folds> 
         }
 
-        <experiment type>: 
+        <extraction type>: 
             "sin" for single ranker (no ensemble technique applied, just the chosen feature ranker)
             "het" for heterogeneous ensemble
             "hom" for homogeneous ensemble
@@ -49,13 +49,13 @@ class FeatureExtraction:
         If 'balanced_selection' is not given, True is assumed.
 
         Note: "thresholds", "aggregators", "rankers" and "datasets" properties need to be lists, even if
-                they have only one element. The same goes for configurations object itself. 
+                they have only one element. The same goes for extraction_cfgs object itself. 
     """
 
-    def __init__(self, configurations, results_path):
+    def __init__(self, extraction_cfgs, results_path):
 
         
-        self.configurations = configurations
+        self.extraction_cfgs = extraction_cfgs
         self._should_load_FSelectorRcpp()
 
         if results_path[-1] != "/":
@@ -72,7 +72,7 @@ class FeatureExtraction:
 
 
     def _should_load_FSelectorRcpp(self):
-        for configuration in self.configurations:
+        for configuration in self.extraction_cfgs:
             for ranker in configuration["rankers"]:
                 if ranker[1] == 'r':
                     rpackages.quiet_require('FSelectorRcpp')
@@ -86,7 +86,7 @@ class FeatureExtraction:
         cfg_count = sum(os.path.isdir(self.results_path+i) for i in os.listdir(self.results_path))
 
 
-        for i, cfg in enumerate(self.configurations):
+        for i, cfg in enumerate(self.extraction_cfgs):
             for dataset_path in cfg["datasets"]:
                 cfg_name = self._mount_extraction_folder_name(i, cfg_count, cfg, dataset_path)
                 complete_results_path = self.results_path + cfg_name
@@ -104,24 +104,31 @@ class FeatureExtraction:
                 if cfg["type"] == 'sin':
                     dm = self.create_data_manager_object(dataset_path, complete_results_path, 0, int_seed)
                     fs_technique = SingleFR(dm, cfg["rankers"], ths)
+                    str_aggregators = None
+
 
                 elif cfg["type"] == 'hom':
                     int_bootstraps = round(int(cfg["bootstraps"]))
                     dm = self.create_data_manager_object(dataset_path, complete_results_path, int_bootstraps, int_seed)
                     fs_technique = Homogeneous(dm, cfg["rankers"], cfg["aggregators"][0], ths)
+                    str_aggregators = [cfg["aggregators"][0]]
 
 
                 elif cfg["type"] == 'het':
                     dm = self.create_data_manager_object(dataset_path, complete_results_path, 0, int_seed)
                     fs_technique = Heterogeneous(dm, cfg["rankers"], cfg["aggregators"][0], ths)
+                    str_aggregators = [cfg["aggregators"][0]]
                     
                     
                 elif cfg["type"] == 'hyb':
                     int_bootstraps = round(int(cfg["bootstraps"]))
                     dm = self.create_data_manager_object(dataset_path, complete_results_path, int_bootstraps, int_seed)
                     fs_technique = Hybrid(dm, cfg["rankers"], cfg["aggregators"][0], cfg["aggregators"][1], ths)
+                    str_aggregators = [cfg["aggregators"][0], cfg["aggregators"][1]]
+                    
 
-
+                str_rankers = [i[0] for i in cfg["rankers"]]
+                InformationManager(dm, None, str_rankers, str_aggregators)  #creates text file info
                 self.perform_selection(fs_technique, balanced_selection)
                 Logger.end_feature_extraction_message()
         return
@@ -135,7 +142,6 @@ class FeatureExtraction:
     
         formatted_time_str = "{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds)
         Logger.time_taken(formatted_time_str)
-        
         return
 
 
@@ -148,11 +154,8 @@ class FeatureExtraction:
 
 
     def perform_selection(self, fs_technique, balanced_selection):
-
         st = time()
         final_selection = FinalSelection(fs_technique, balanced_selection)
         final_selection.start(skip_encoding=True)
         self.compute_time_taken(st)
-
-        Logger.end_feature_extraction_message()
         return
