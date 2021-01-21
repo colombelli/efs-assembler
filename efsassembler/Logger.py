@@ -165,3 +165,13 @@ class Logger:
         log = "Final selection process | " + str(i) + "/" + str(total)
         Logger.handler.info(log)
         return
+
+    @classmethod
+    def undersampling_not_specified(self):
+        Logger.handler.info("'undersampling' parameter not specified, assuming True.")
+        return
+
+    @classmethod
+    def balanced_final_selection_not_specified(self):
+        Logger.handler.info("'balanced_final_selection' parameter not specified, assuming True.")
+        return

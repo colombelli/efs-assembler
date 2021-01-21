@@ -28,7 +28,8 @@ class Experiments:
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
             "aggregators": [<aggregator1 object>, <aggregator2 object>],
             "rankers": [<ranker1 object>, <ranker2 object>, ..., <rankern object>],
-            "datasets": [<path to dataset1>, <path to dataset2>, ..., <path to dataset n>]
+            "datasets": [<path to dataset1>, <path to dataset2>, ..., <path to dataset n>],
+            "balanced_final_selection": <bool indicating if final feature selection is to be applied in balanced folds> 
         }
 
         <experiment type>: 
@@ -47,16 +48,16 @@ class Experiments:
             either "python" or "r"
 
 
+        If 'undersampling' and 'balanced_final_selection' are not given, True is assumed.
 
         Note: "thresholds", "aggregators", "rankers" and "datasets" properties need to be lists, even if
                 they have only one element. The same goes for experiments object itself. 
     """
 
-    def __init__(self, experiments, results_path, final_selection_balanced=True):
+    def __init__(self, experiments, results_path):
 
         
         self.experiments = experiments
-        self.final_selection_balanced = final_selection_balanced
         self._should_load_FSelectorRcpp()
 
         if results_path[-1] != "/":
@@ -93,32 +94,45 @@ class Experiments:
                 complete_results_path = self.results_path + exp_name
 
                 int_folds = round(int(exp["folds"]))
-                undersampling = exp["undersampling"]
                 int_seed = round(int(exp["seed"]))
-                
+
+                if ("undersampling" in exp): 
+                    undersampling = exp["undersampling"]
+                else: 
+                    Logger.undersampling_not_specified()
+                    undersampling=True
+                if ("balanced_final_selection" in exp):
+                    balanced_final_selection = exp["balanced_final_selection"]
+                else:
+                    Logger.balanced_final_selection_not_specified()
+                    balanced_final_selection=True
+
+
                 ths = exp["thresholds"]
                 classifier_file = exp["classifier"]
 
                 if exp["type"] == 'sin':
                     self.perform_selection_single(dataset_path, complete_results_path, exp["rankers"],
-                                                    int_folds, undersampling, int_seed, ths, classifier_file)
+                                                    int_folds, undersampling, int_seed, ths, classifier_file,
+                                                    balanced_final_selection)
 
                 elif exp["type"] == 'hom':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hom(dataset_path, complete_results_path,
                                                 exp["rankers"], exp["aggregators"][0], int_folds, undersampling,
-                                                int_bootstraps, int_seed, ths, classifier_file)
+                                                int_bootstraps, int_seed, ths, classifier_file, balanced_final_selection)
 
                 elif exp["type"] == 'het':
                     self.perform_selection_het(dataset_path, complete_results_path,
                                                 exp["rankers"], exp["aggregators"][0], int_folds, undersampling,
-                                                int_seed, ths, classifier_file)
+                                                int_seed, ths, classifier_file, balanced_final_selection)
                     
                 elif exp["type"] == 'hyb':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hyb(dataset_path, complete_results_path, exp["rankers"], 
                                                 exp["aggregators"][0], exp["aggregators"][1], 
-                                                int_folds, undersampling, int_bootstraps, int_seed, ths, classifier_file)
+                                                int_folds, undersampling, int_bootstraps, int_seed, ths, classifier_file,
+                                                balanced_final_selection)
         return
 
 
@@ -136,7 +150,8 @@ class Experiments:
 
 
     def perform_selection_hyb(self, dataset_path, results_path, rankers, aggregator1, aggregator2,
-                                num_folds, undersampling, num_bootstraps, seed, ths, classifier_file):
+                                num_folds, undersampling, num_bootstraps, seed, ths, classifier_file,
+                                balanced_final_selection):
         
         str_aggregators = [aggregator1, aggregator2]
         str_rankers = [i[0] for i in rankers]
@@ -164,15 +179,15 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
         
-        final_selection = FinalSelection(ensemble, self.final_selection_balanced)
+        final_selection = FinalSelection(ensemble, balanced_final_selection)
         final_selection.start()
 
         Logger.end_experiment_message()
         return
 
 
-    def perform_selection_het(self, dataset_path, results_path, rankers, 
-                                aggregator, num_folds, undersampling, seed, ths, classifier_file):
+    def perform_selection_het(self, dataset_path, results_path, rankers, aggregator, num_folds, undersampling, 
+                                    seed, ths, classifier_file, balanced_final_selection):
 
         str_aggregators = [aggregator]
         str_rankers = [i[0] for i in rankers]
@@ -201,7 +216,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(ensemble, self.final_selection_balanced)
+        final_selection = FinalSelection(ensemble, balanced_final_selection)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -209,8 +224,8 @@ class Experiments:
 
     
 
-    def perform_selection_hom(self, dataset_path, results_path, ranker, 
-                                aggregator, num_folds, undersampling, num_bootstraps, seed, ths, classifier_file):
+    def perform_selection_hom(self, dataset_path, results_path, ranker, aggregator, num_folds, undersampling, 
+                                    num_bootstraps, seed, ths, classifier_file, balanced_final_selection):
 
         str_aggregators = [aggregator]
         str_rankers = [ranker[0][0]]
@@ -238,7 +253,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(ensemble, self.final_selection_balanced)
+        final_selection = FinalSelection(ensemble, balanced_final_selection)
         final_selection.start()
 
         Logger.end_experiment_message()
@@ -246,8 +261,8 @@ class Experiments:
 
     
 
-    def perform_selection_single(self, dataset_path, results_path, 
-                                ranker, num_folds, undersampling, seed, ths, classifier_file):
+    def perform_selection_single(self, dataset_path, results_path, ranker, num_folds, undersampling, seed, 
+                                        ths, classifier_file, balanced_final_selection):
 
         num_bootstraps = 0
         str_rankers = [ranker[0][0]]    # because ranker is always a list, even when it have only one element
@@ -275,7 +290,7 @@ class Experiments:
         Logger.creating_csv_files()
         im.create_csv_tables()
 
-        final_selection = FinalSelection(feature_ranker, self.final_selection_balanced)
+        final_selection = FinalSelection(feature_ranker, balanced_final_selection)
         final_selection.start()
 
         Logger.end_experiment_message()
