@@ -19,7 +19,7 @@ from copy import deepcopy
 class DataManager:
 
     def __init__(self, results_path, file_path, num_bootstraps, 
-                num_folds, seed=0):
+                num_folds, undersampling=True, seed=0):
         
         self.seed = seed
         self.set_seed()
@@ -27,7 +27,7 @@ class DataManager:
         self.file_path = file_path
         self.num_bootstraps = num_bootstraps
         self.num_folds = num_folds
-
+        self.undersampling = undersampling
        
         #self.r_df = None
         self.pd_df = None
@@ -157,7 +157,7 @@ class DataManager:
         return urllib.parse.unquote(underscore_encoded.replace('_','%'), errors='strict')
 
 
-    # Important note: The method only encodes columns (the genes)
+    # Important note: The method only encodes columns (the features)
     @classmethod
     def encode_df(self, df):
         
@@ -170,7 +170,7 @@ class DataManager:
 
 
     # rows is a boolean parameter telling wheter the method must also decode its rows;
-    # it is basically used when decoding ranking-like dataframes (where genes are indexes) 
+    # it is basically used when decoding ranking-like dataframes (where features are indexes) 
     @classmethod
     def decode_df(self, df, rows:bool):
 
@@ -222,7 +222,7 @@ class DataManager:
     def __calculate_folds(self):
 
         k = self.num_folds
-        skf = StratifiedKFold(self.pd_df, "class", k)
+        skf = StratifiedKFold(self.pd_df, "class", k, undersampling=self.undersampling)
         self.folds = list(skf.split())
         return
 

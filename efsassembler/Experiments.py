@@ -24,6 +24,7 @@ class Experiments:
             "seed": <int>,
             "thresholds": [<int for threshold1>, <int for threshold2>, ... , <int for thresholdn>]
             "folds": <int number of folds for the StratifiedKFold cross-validation>,
+            "undersampling": <bool indicating if undersampling is to be applied in the stratified cv>,
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
             "aggregators": [<aggregator1 object>, <aggregator2 object>],
             "rankers": [<ranker1 object>, <ranker2 object>, ..., <rankern object>],
@@ -92,6 +93,7 @@ class Experiments:
                 complete_results_path = self.results_path + exp_name
 
                 int_folds = round(int(exp["folds"]))
+                undersampling = exp["undersampling"]
                 int_seed = round(int(exp["seed"]))
                 
                 ths = exp["thresholds"]
@@ -99,24 +101,24 @@ class Experiments:
 
                 if exp["type"] == 'sin':
                     self.perform_selection_single(dataset_path, complete_results_path, exp["rankers"],
-                                                    int_folds, int_seed, ths, classifier_file)
+                                                    int_folds, undersampling, int_seed, ths, classifier_file)
 
                 elif exp["type"] == 'hom':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hom(dataset_path, complete_results_path,
-                                                exp["rankers"], exp["aggregators"][0], int_folds,
+                                                exp["rankers"], exp["aggregators"][0], int_folds, undersampling,
                                                 int_bootstraps, int_seed, ths, classifier_file)
 
                 elif exp["type"] == 'het':
                     self.perform_selection_het(dataset_path, complete_results_path,
-                                                exp["rankers"], exp["aggregators"][0], int_folds,
+                                                exp["rankers"], exp["aggregators"][0], int_folds, undersampling,
                                                 int_seed, ths, classifier_file)
                     
                 elif exp["type"] == 'hyb':
                     int_bootstraps = round(int(exp["bootstraps"]))
                     self.perform_selection_hyb(dataset_path, complete_results_path, exp["rankers"], 
                                                 exp["aggregators"][0], exp["aggregators"][1], 
-                                                int_folds, int_bootstraps, int_seed, ths, classifier_file)
+                                                int_folds, undersampling, int_bootstraps, int_seed, ths, classifier_file)
         return
 
 
@@ -134,12 +136,12 @@ class Experiments:
 
 
     def perform_selection_hyb(self, dataset_path, results_path, rankers, aggregator1, aggregator2,
-                                num_folds, num_bootstraps, seed, ths, classifier_file):
+                                num_folds, undersampling, num_bootstraps, seed, ths, classifier_file):
         
         str_aggregators = [aggregator1, aggregator2]
         str_rankers = [i[0] for i in rankers]
 
-        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, undersampling=undersampling, seed=seed)
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
@@ -170,13 +172,13 @@ class Experiments:
 
 
     def perform_selection_het(self, dataset_path, results_path, rankers, 
-                                aggregator, num_folds, seed, ths, classifier_file):
+                                aggregator, num_folds, undersampling, seed, ths, classifier_file):
 
         str_aggregators = [aggregator]
         str_rankers = [i[0] for i in rankers]
         num_bootstraps = 0
 
-        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, undersampling=undersampling, seed=seed)
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
@@ -208,12 +210,12 @@ class Experiments:
     
 
     def perform_selection_hom(self, dataset_path, results_path, ranker, 
-                                aggregator, num_folds, num_bootstraps, seed, ths, classifier_file):
+                                aggregator, num_folds, undersampling, num_bootstraps, seed, ths, classifier_file):
 
         str_aggregators = [aggregator]
         str_rankers = [ranker[0][0]]
 
-        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, undersampling=undersampling, seed=seed)
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
@@ -245,12 +247,12 @@ class Experiments:
     
 
     def perform_selection_single(self, dataset_path, results_path, 
-                                ranker, num_folds, seed, ths, classifier_file):
+                                ranker, num_folds, undersampling, seed, ths, classifier_file):
 
         num_bootstraps = 0
         str_rankers = [ranker[0][0]]    # because ranker is always a list, even when it have only one element
 
-        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, seed)
+        dm = DataManager(results_path, dataset_path, num_bootstraps, num_folds, undersampling=undersampling, seed=seed)
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
