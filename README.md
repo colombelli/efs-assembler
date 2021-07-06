@@ -15,6 +15,7 @@
     - [Example](#experiments-example)
 - [Datasets expected format](#datasets-expected-format)
 - [Results folder structure](#results-folder-structure)
+- [Usage for running feature extraction](#usage-for-running-feature-extraction)
 
 ## Introduction
 
@@ -81,12 +82,14 @@ exp = Experiments(experiments_list, "my/results/path/")
 exp.run()
 ```
 
-The expected type of input for the ```experiments_list``` object is a list of dictionaries, where each dictionary represents an experiment type. If multiple datasets are provided, multiple experiments for that type will be executed, each experiment using each of the datasets. The expected keys and values for each dictionary are:
+The expected type of input for the ```experiments_list``` object is a list of dictionaries, where each dictionary represents an experiment type. If multiple datasets are provided, multiple experiments of that type will be executed, each experiment using each of the provided datasets. The expected keys and values for each dictionary are:
 * ```"type"```: either ```"hom"```, ```"het"```, ```"sin"``` or ```"hyb"```
 * ```"thresholds"```: list of integer thresholds or percentages of features to consider, e.g., ```[3, 5, 10, 15]``` that would select the top 3 features, top 5 features, top 10 features and top 15 features; or ```[0.1, 0.2, 0.5]``` that would select the top 10% features, top 20% features and top 50% features
 * ```"seed"```: an integer representing the seed for reproducibility, e.g., ```42```
 * ```"folds"```: an integer representing the number of folds for the stratified cross-validation, e.g., ```10```
-* ```"classifier"```: either ```"gbm"``` or ```"svm"``` for provided classification algorithms
+* ```"undersampling"```: a boolean indicating if the stratified cross-validation is to be performed with undersampling
+* ```"balanced_final_selection"```: a boolean indicating if the final feature selection is to be applied in [balanced dataset folds](#balanced_folds)
+* ```"classifier"```: either ```"gbc"``` or ```"svm"``` for provided classification algorithms
 * ```"datasets"```: a list with dataset paths that are going to be exposed to the experiment, e.g., ```["data/set/one.csv", "data/set/two.rds"]```. The accepted file types for the datasets are .csv and .rds. Additional information about the expected dataset format is given on [this section](#datasets-expected-format).
 * ```"rankers"```: a list with the feature selection algorithms to be used (even in "sin" and "hom" experiments a list is expected). The feature selection algorithms are represented by a tuple in the format ("file_name", "language", "rank_file_name_to_use_for_saving_their_result"), e.g., ```[("reliefF", "python", "rf"), ("geoDE", "python", "gd"), ("gain-ratio", "r", "gr"), ("symmetrical-uncertainty", "r", "su"), ("wx", "python", "wx")]```. Those are the current available algorithms. If more than one is given for a "sin" or "hom" experiment, the first algorithm will be used.
 
@@ -105,6 +108,8 @@ experiments_list = [
         "thresholds": [1,5,10,50],
         "seed": 42,
         "folds": 10,
+        "undersampling": False,
+        "balanced_final_selection": False,
         "classifier": "gbm",
         "datasets": ["my/dataset/one.csv", "my/dataset/two.csv"],
         "rankers": [("reliefF", "python", "rf"), ("geoDE", "python", "gd"), ("gain-ratio", "r", "gr")],
@@ -116,6 +121,8 @@ experiments_list = [
         "thresholds": [1,5,10,50],
         "seed": 42,
         "folds": 10,
+        "undersampling": True,
+        "balanced_final_selection": True,
         "classifier": "svm",
         "datasets": ["my/dataset/one.csv", "my/dataset/two.csv"],
         "rankers": [("reliefF", "python", "rf"), ("wx", "python", "wx"), ("gain-ratio", "r", "gr")],
@@ -126,6 +133,8 @@ experiments_list = [
         "thresholds": [1,5,10,50],
         "seed": 42,
         "folds": 10,
+        "undersampling": False,
+        "balanced_final_selection": True,
         "classifier": "gbm",
         "datasets": ["my/dataset/one.csv"],
         "rankers": [("gain-ratio", "r", "gr")],
@@ -137,6 +146,8 @@ experiments_list = [
         "thresholds": [1,5,10,50],
         "seed": 42,
         "folds": 10,
+        "undersampling": True,
+        "balanced_final_selection": False,
         "classifier": "gbm",
         "datasets": ["my/dataset/one.csv"],
         "rankers": [("reliefF", "python", "rf")]
@@ -176,7 +187,7 @@ Example for a het experiment using borda aggregation and a 5-fold stratified cro
 ```
 .                                   # results/experiment root folder 
 ├── accuracies_results.csv          # accuracies for each threshold in each fold
-├── experiment_info.txt             # information about the experiment
+├── info.txt                        # information about the experiment or simple feature extraction
 ├── final_confusion_matrices.pkl    # confusion matrices for each threshold in each fold
 ├── final_results.csv               # stabilites and classification metrics mean/std for each threshold
 ├── fold_sampling.pkl               # indexes used for each fold iteration
@@ -218,6 +229,23 @@ Example for a het experiment using borda aggregation and a 5-fold stratified cro
             └── relevance_rank.csv 
 ```
 
-The final selection process will automatically split the data into equally (except, maybe, for the last fold) stratified folds using all the samples of the minority class and a correspondent amount of the majority class. It will generate folds (each with the same examples for the minority class) until there's no majority class examples left. After the feature selection method concluding the ranking for each fold, they are aggregated in one final ranking, the ```relevance_rank.csv``` file inside the ```selection/``` folder. This should be used as the final true feature importance ranking generated by the selected method for the provided data. 
+<a name="balanced_folds">If</a> ```"balanced_final_selection"``` is set to *True* (or not provided), the final selection process will split the whole dataset into equally (except, maybe, for the last fold) stratified folds using all the samples of the minority class and a correspondent amount of the majority class. It will generate folds (each with the same examples for the minority class) until there's no majority class examples left. After the feature selection method conclude the ranking for each fold, they are aggregated in one final ranking, the ```relevance_rank.csv``` file inside the ```selection/``` folder (or ```agg_rank_th<a threshold>.csv``` if FS method is threshold sensitive). This should be used as the final true feature importance ranking generated by the selected method for the provided data. If the same argument is set to *False*, the feature selection technique will be applied in the whole dataset directly.
 
 The numbers inside the ranking .csv files should be ignored as they are only residuals left after the aggreagtion process conclude (it used them as a reference for sorting the features). The features are ordered by descending of relevance, which means that the first feature of the ranking file is the most important and the last feature in the ranking is the least important.
+
+
+
+## Usage for running feature extraction
+
+If the user only wants to directly extract the features without the whole experiment procedures, the ```FeatureExtraction``` class can be used and it works essentially like the Experiments class.
+
+```python
+from efsassembler import FeatureExtraction
+fe = FeatureExtraction(extraction_configs, "my/results/path/")
+fe.run()
+```
+
+The expected type of input for the ```extraction_configs``` object is a list of dictionaries, where each dictionary represents a feature extraction (FE) configuration. If multiple datasets are provided, multiple FEs using that configuration will be executed, each FE using each of the provided datasets. The expected keys and values for each dictionary are:
+```"type"```, ```"thresholds"```, ```"seed"```,```"datasets"```, ```"rankers"```, ```"aggregators"``` (if applied), ```"bootstraps"``` (if applied) and ```"balanced_selection"``` (True if the FE process is to be applied in [balanced dataset folds](#balanced_folds)). The values and meanings of these keys are the same as explained in the [Usage for running experiments](#usage-for-running-experiments) section.
+
+
