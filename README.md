@@ -89,7 +89,7 @@ The expected type of input for the ```experiments_list``` object is a list of di
 * ```"folds"```: an integer representing the number of folds for the stratified cross-validation, e.g., ```10```
 * ```"undersampling"```: a boolean indicating if the stratified cross-validation is to be performed with undersampling
 * ```"balanced_final_selection"```: a boolean indicating if the final feature selection is to be applied in [balanced dataset folds](#balanced_folds)
-* ```"classifier"```: either ```"gbm"``` or ```"svm"``` for provided classification algorithms
+* ```"classifier"```: either ```"gbc"``` or ```"svm"``` for provided classification algorithms
 * ```"datasets"```: a list with dataset paths that are going to be exposed to the experiment, e.g., ```["data/set/one.csv", "data/set/two.rds"]```. The accepted file types for the datasets are .csv and .rds. Additional information about the expected dataset format is given on [this section](#datasets-expected-format).
 * ```"rankers"```: a list with the feature selection algorithms to be used (even in "sin" and "hom" experiments a list is expected). The feature selection algorithms are represented by a tuple in the format ("file_name", "language", "rank_file_name_to_use_for_saving_their_result"), e.g., ```[("reliefF", "python", "rf"), ("geoDE", "python", "gd"), ("gain-ratio", "r", "gr"), ("symmetrical-uncertainty", "r", "su"), ("wx", "python", "wx")]```. Those are the current available algorithms. If more than one is given for a "sin" or "hom" experiment, the first algorithm will be used.
 
