@@ -1,6 +1,6 @@
 # efs-assembler
 
-![](https://img.shields.io/badge/python-v3.8-blue)
+![](https://img.shields.io/badge/python-v3.6-blue)
 ![](https://img.shields.io/badge/R-v4.0-red)
 
 ## Summary
@@ -16,6 +16,7 @@
 - [Datasets expected format](#datasets-expected-format)
 - [Results folder structure](#results-folder-structure)
 - [Usage for running feature extraction](#usage-for-running-feature-extraction)
+- [Adding new algorithms](#add_new_algs)
 
 ## Introduction
 
@@ -249,3 +250,40 @@ The expected type of input for the ```extraction_configs``` object is a list of 
 ```"type"```, ```"thresholds"```, ```"seed"```,```"datasets"```, ```"rankers"```, ```"aggregators"``` (if applied), ```"bootstraps"``` (if applied) and ```"balanced_selection"``` (True if the FE process is to be applied in [balanced dataset folds](#balanced_folds)). The values and meanings of these keys are the same as explained in the [Usage for running experiments](#usage-for-running-experiments) section.
 
 
+
+## <a name="add_new_algs">Adding new algorithms (feature selection, aggregation, classifier)</a>
+ 
+ For the addition of new feature selection algorithms, new aggregation algorithms or new classifiers, the ScriptsManager class comes handy.
+ The addition is as simple as initializing the a ScriptsManager object and call the appropriate add method.
+ 
+ ```python
+from efsassembler import ScriptsManager
+
+sm  = ScriptsManager()
+
+# For adding new feature selection algorithms:
+sm.add_fs_algorithm("/path/to/my/selector.py")   # Or selector.r
+
+# For adding new aggregation algorithms:
+sm.add_aggregation_algorithm("/path/to/my/aggregator.py")
+
+# For adding new classifier algorithms:
+sm.add_classifier("/path/to/my/classifier.py")
+```
+
+If, for some reason, the user wants to remove any user added algorithms, remove methods should be called instead and the name of the script to remove should be given as the parameter for the remove method.
+
+```python
+from efsassembler import ScriptsManager
+
+sm  = ScriptsManager()
+
+# For removing user added feature selection algorithms:
+sm.remove_fs_algorithm("selector.py")   # Or selector.r
+
+# For removing user added aggregation algorithms:
+sm.remove_aggregation_algorithm("aggregator.py")
+
+# For removing user added classifiers:
+sm.remove_fs_algorithm("classifier.py")
+```
