@@ -17,6 +17,9 @@
 - [Results folder structure](#results-folder-structure)
 - [Usage for running feature extraction](#usage-for-running-feature-extraction)
 - [Adding new algorithms](#add_new_algs)
+    - [Rules for new feature selection algorithms](#rules-for-new-feature-selection-algorithms) 
+    - [Rules for new aggregation algorithms](#rules-for-new-aggregation-algorithms) 
+    - [Rules for new classifier algorithms](#rules-for-new-classifier-algorithms) 
 
 ## Introduction
 
@@ -287,3 +290,26 @@ sm.remove_aggregation_algorithm("aggregator.py")
 # For removing user added classifiers:
 sm.remove_fs_algorithm("classifier.py")
 ```
+
+
+### <a name="rules-for-new-feature-selection-algorithms">Rules for new feature selection algorithms</a>
+
+The first thing to noticed is that the new user-defined personalized feature selection algorithm to integrate the ensemble should be a ranker. It is supposed to rank all the given features according to its relevance to the binary classification problem from the most to the least relevant one. The output of the algorithm should be a dataframe where the features are the index and there's only one column called exaclty '**rank**' (without the single quotes) where each value corresponds to the ranking of the feature (it could be any arbitrary value, but something like {1....n} where n is the total number of features, is more common).
+
+The output, then, should look like:
+|   | rank |
+| ------------- | ------------- |
+| feature_x  | 1  |
+| feature_y  | 2  |
+| feature_z  | 3  |
+| feature_w  | 4  |
+
+The script.py or script.r implementing the personalized feature selection algorithm should define a function called '**select**(arg)' from which it will receive the input and deliver the output. While the name of the parameter does not matter as long as one and only one argument is defined, the name of the function should be exaclty '**select**'.
+
+The input received by the function is a fraction of the original dataset in a dataframe format. The select(arg) function should be able to understand this data structure and establish a criteria to deliver the desired output. The fraction of the original dataset only reduces some samples under the k-fold cross validation process, but its samples have all the features including the class column, as detailed [here](#datasets-expected-format).
+
+
+### <a name="rules-for-new-aggregation-algorithms">Rules for new aggregation algorithms</a>
+
+
+### <a name="rules-for-new-classifier-algorithms">Rules for new classifier algorithms</a>
