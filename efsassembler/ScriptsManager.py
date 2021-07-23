@@ -63,3 +63,30 @@ class ScriptsManager:
             else:
                 raise Exception(error404)
         return
+
+
+
+    def add_classifier(self, script_path):
+        user_scripts_path = self.pkg_path + "classifiers/user_algorithms/"
+        dest = user_scripts_path + script_path.split('/')[-1]
+        copyfile(script_path, dest)
+        # TO-DO: Add some verification operations (repeated file etc) and messages
+        return
+
+
+    def remove_classifier(self, script_name):
+        user_scripts_path = self.pkg_path + "classifiers/user_algorithms/"
+        error404 = "Couldn't find provided file: " + script_name
+
+        if '.' in script_name: #if user provided the extension
+            file_path = user_scripts_path + script_name
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            else:
+                raise Exception(error404)
+        else: 
+            if os.path.isfile(user_scripts_path + script_name + ".py"):
+                os.remove(user_scripts_path + script_name + ".py")
+            else:
+                raise Exception(error404)
+        return
