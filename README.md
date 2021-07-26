@@ -326,3 +326,10 @@ The `threshold_sensitive` variable is only used to indicate if the aggregation a
 
 
 ### <a name="rules-for-new-classifier-algorithms">Rules for new classifier algorithms</a>
+
+The script containing the new personalized classifier algorithm should implement a class called `Classifier` with three methods anologous to scikit-learn predictor objects:
+* `.fit(X, y)`: method for training the classifier
+* `.predict_proba(X)`: method for predicting the probabilities of each class for each sample data
+* `.predict(X)`: method for predicting the classes of each sample data
+
+For detailed information on the functionality of those methods, see [Developing scikit-learn estimators](#https://scikit-learn.org/stable/developers/develop.html), or directly a [classifier example](#https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html).
