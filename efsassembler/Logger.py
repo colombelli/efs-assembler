@@ -22,8 +22,8 @@ class Logger:
         return
 
     @classmethod
-    def end_feature_extraction_message(self):
-        Logger.handler.info("Feature extraction finished!")
+    def end_feature_selection_message(self):
+        Logger.handler.info("Feature selection finished!")
         return
 
     @classmethod

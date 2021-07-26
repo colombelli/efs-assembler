@@ -17,7 +17,7 @@ HOMOGENEOUS_FS_DESIGN = "Homogeneous Ensemble"
 # info file
 INFO_FILE_NAME = "info.txt"
 TITLE_INFO_FILE_EXPERIMENT = "Experiment Informations\n"
-TITLE_INFO_FILE_EXTRACTION = "Feature Extraction Informations\n"
+TITLE_INFO_FILE_SELECTION = "Feature Selection Informations\n"
 DESIGN_INFO_FILE = "Design: "
 NUM_FOLDS_INFO_FILE = "Chosen k for stratified k-fold cv: "
 NUM_BOOTSTRAPS_INFO_FILE = "Number of bootstraps: "

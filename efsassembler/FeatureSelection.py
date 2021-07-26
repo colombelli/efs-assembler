@@ -14,13 +14,13 @@ from efsassembler.FinalSelection import FinalSelection
 
 import rpy2.robjects.packages as rpackages
 
-class FeatureExtraction:
+class FeatureSelection:
 
     """
-        extraction_cfgs object should be a list of dictionaries in the following format:
+        selection_cfgs object should be a list of dictionaries in the following format:
 
         {
-            "type": <extraction type>,
+            "type": <selection type>,
             "seed": <int>,
             "thresholds": [<int for threshold1>, <int for threshold2>, ... , <int for thresholdn>],
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
@@ -30,7 +30,7 @@ class FeatureExtraction:
             "balanced_selection": <bool indicating if feature selection is to be applied in balanced folds> 
         }
 
-        <extraction type>: 
+        <selection type>: 
             "sin" for single ranker (no ensemble technique applied, just the chosen feature ranker)
             "het" for heterogeneous ensemble
             "hom" for homogeneous ensemble
@@ -49,13 +49,13 @@ class FeatureExtraction:
         If 'balanced_selection' is not given, True is assumed.
 
         Note: "thresholds", "aggregators", "rankers" and "datasets" properties need to be lists, even if
-                they have only one element. The same goes for extraction_cfgs object itself. 
+                they have only one element. The same goes for selection_cfgs object itself. 
     """
 
-    def __init__(self, extraction_cfgs, results_path):
+    def __init__(self, selection_cfgs, results_path):
 
         
-        self.extraction_cfgs = extraction_cfgs
+        self.selection_cfgs = selection_cfgs
         self._should_load_FSelectorRcpp()
 
         if results_path[-1] != "/":
@@ -64,15 +64,15 @@ class FeatureExtraction:
             self.results_path = results_path
 
 
-    def _mount_extraction_folder_name(self, i, count, cfg, ds_path):
+    def _mount_selection_folder_name(self, i, count, cfg, ds_path):
 
-        sufix = "_Extraction" + str(count+i+1) + "/"
+        sufix = "_Selection" + str(count+i+1) + "/"
         rad = cfg["type"] + "_" + ds_path.split('/')[-1].split('.')[0]
         return rad+sufix
 
 
     def _should_load_FSelectorRcpp(self):
-        for configuration in self.extraction_cfgs:
+        for configuration in self.selection_cfgs:
             for ranker in configuration["rankers"]:
                 if ranker[1] == 'r':
                     rpackages.quiet_require('FSelectorRcpp')
@@ -86,9 +86,9 @@ class FeatureExtraction:
         cfg_count = sum(os.path.isdir(self.results_path+i) for i in os.listdir(self.results_path))
 
 
-        for i, cfg in enumerate(self.extraction_cfgs):
+        for i, cfg in enumerate(self.selection_cfgs):
             for dataset_path in cfg["datasets"]:
-                cfg_name = self._mount_extraction_folder_name(i, cfg_count, cfg, dataset_path)
+                cfg_name = self._mount_selection_folder_name(i, cfg_count, cfg, dataset_path)
                 complete_results_path = self.results_path + cfg_name
 
                 int_seed = round(int(cfg["seed"]))
@@ -130,7 +130,7 @@ class FeatureExtraction:
                 str_rankers = [i[0] for i in cfg["rankers"]]
                 InformationManager(dm, None, str_rankers, str_aggregators)  #creates text file info
                 self.perform_selection(fs_technique, balanced_selection)
-                Logger.end_feature_extraction_message()
+                Logger.end_feature_selection_message()
         return
 
 

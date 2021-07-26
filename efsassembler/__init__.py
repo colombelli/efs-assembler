@@ -13,4 +13,4 @@ from .StratifiedKFold import StratifiedKFold
 from .Logger import Logger
 from .FinalSelection import FinalSelection
 from .FSTechnique import FSTechnique
-from .FeatureExtraction import FeatureExtraction
+from .FeatureSelection import FeatureSelection
