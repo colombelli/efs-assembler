@@ -15,7 +15,7 @@
     - [Example](#experiments-example)
 - [Datasets expected format](#datasets-expected-format)
 - [Results folder structure](#results-folder-structure)
-- [Usage for running feature extraction](#usage-for-running-feature-extraction)
+- [Usage for running feature selection](#usage-for-running-feature-selection)
 - [Adding new algorithms](#add_new_algs)
     - [Rules for new feature selection algorithms](#rules-for-new-feature-selection-algorithms) 
     - [Rules for new aggregation algorithms](#rules-for-new-aggregation-algorithms) 
@@ -239,18 +239,18 @@ The numbers inside the ranking .csv files should be ignored as they are only res
 
 
 
-## Usage for running feature extraction
+## Usage for running feature selection
 
-If the user only wants to directly extract the features without the whole experiment procedures, the ```FeatureExtraction``` class can be used and it works essentially like the Experiments class.
+If the user only wants to directly select the features without the whole experiment procedures (cross-validation, classification, stability measurements, etc), the ```FeatureSelection``` class can be used and it works essentially like the Experiments class.
 
 ```python
-from efsassembler import FeatureExtraction
-fe = FeatureExtraction(extraction_configs, "my/results/path/")
-fe.run()
+from efsassembler import FeatureSelection
+fs = FeatureSelection(selection_configs, "my/results/path/")
+fs.run()
 ```
 
-The expected type of input for the ```extraction_configs``` object is a list of dictionaries, where each dictionary represents a feature extraction (FE) configuration. If multiple datasets are provided, multiple FEs using that configuration will be executed, each FE using each of the provided datasets. The expected keys and values for each dictionary are:
-```"type"```, ```"thresholds"```, ```"seed"```,```"datasets"```, ```"rankers"```, ```"aggregators"``` (if applied), ```"bootstraps"``` (if applied) and ```"balanced_selection"``` (True if the FE process is to be applied in [balanced dataset folds](#balanced_folds)). The values and meanings of these keys are the same as explained in the [Usage for running experiments](#usage-for-running-experiments) section.
+The expected type of input for the ```selection_configs``` object is a list of dictionaries, where each dictionary represents a feature selection (FS) configuration. If multiple datasets are provided, multiple FSs using that configuration will be executed, each FS using each of the provided datasets. The expected keys and values for each dictionary are:
+```"type"```, ```"thresholds"```, ```"seed"```,```"datasets"```, ```"rankers"```, ```"aggregators"``` (if applied), ```"bootstraps"``` (if applied) and ```"balanced_selection"``` (True if the FS process is to be applied in [balanced dataset folds](#balanced_folds)). The values and meanings of these keys are the same as explained in the [Usage for running experiments](#usage-for-running-experiments) section.
 
 
 
