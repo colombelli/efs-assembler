@@ -294,7 +294,7 @@ sm.remove_fs_algorithm("classifier.py")
 
 ### <a name="rules-for-new-feature-selection-algorithms">Rules for new feature selection algorithms</a>
 
-The first thing to noticed is that the new user-defined personalized feature selection algorithm to integrate the ensemble should be a ranker. It is supposed to rank all the given features according to its relevance to the binary classification problem from the most to the least relevant one. The output of the algorithm should be a dataframe where the features are the index and there's only one column called exaclty '**rank**' (without the single quotes) where each value corresponds to the ranking of the feature (it could be any arbitrary value, but something like {1....n} where n is the total number of features, is more common).
+The first thing to noticed is that the new user-defined personalized feature selection algorithm to integrate the ensemble should be a ranker. It is supposed to rank all the given features according to its relevance to the binary classification problem from the most to the least relevant one. The <a name="ranking_format">output</a> of the algorithm should be a dataframe where the features are the index and there's only one column called exaclty `rank` where each value corresponds to the ranking of the feature (it could be any arbitrary value, but something like {1....n} where n is the total number of features, is more common).
 
 The output, then, should look like:
 |   | rank |
@@ -304,12 +304,32 @@ The output, then, should look like:
 | feature_z  | 3  |
 | feature_w  | 4  |
 
-The script.py or script.r implementing the personalized feature selection algorithm should define a function called '**select**(arg)' from which it will receive the input and deliver the output. While the name of the parameter does not matter as long as one and only one argument is defined, the name of the function should be exaclty '**select**'.
+The script.py or script.r implementing the personalized feature selection algorithm should define a function called `select(arg)` from which it will receive the input and deliver the output. While the name of the parameter does not matter as long as one and only one argument is defined, the name of the function should be exaclty `select`.
 
-The input received by the function is a fraction of the original dataset in a dataframe format. The select(arg) function should be able to understand this data structure and establish a criteria to deliver the desired output. The fraction of the original dataset only reduces some samples under the k-fold cross validation process, but its samples have all the features including the class column, as detailed [here](#datasets-expected-format).
+The input received by the function is a fraction of the original dataset in a dataframe format. The `select(arg)` function should be able to understand this data structure and establish a criteria to deliver the desired output. The fraction of the original dataset only reduces some samples under the k-fold cross validation process, but its remaining samples have all the features, including the class column, looking exactly as detailed [here](#datasets-expected-format).
 
 
 ### <a name="rules-for-new-aggregation-algorithms">Rules for new aggregation algorithms</a>
 
+The script implementing the new aggregation algorithm should have:
+* A boolean variable called `heavy`
+* A boolean variable called `threshold_sensitive`
+* A function with only two arguments called `aggregate`, where the first argument is for `self` and the second, `selector`, is for the type of experiment (implemented by the `FSTechnique` superclass or any of its specialized classes, `Heterogeneous`, `Homogeneous`, `Hybrid`, `SingleFR`).
+
+The `heavy` variable is only considered in the Hybrid ensemble experiments and aggregators requiring the heavy behavior are only used as first aggregation methods (see our paper for more information on that). If `heavy` is set to true, for each fold iteration, it forces the buildage of a dictionary containing all rankings from all feature ranker methods and keep it in **memory** until the next fold iteration. This is useful if the user wants, for example, to measure the stability of the first layer rankings of each feature ranker method. This dictionary is accessible by the attribute `selector.dm.bs_ranking` and it should be used to deliver the output: the aggregated rankings of the first aggregator method. Assuming _m_ bootstraps, the `selector.dm.bs_ranking` is a dictionary in which the keys represent the number of the bootstrap (from 0 to _m_-1) and the value is a list of rankings to aggregate. Each item in this list follows the data structure described [here](#ranking_format). The output in this case is a list of rankings (in the same format), one for each bootstrap.
+
+Set `heavy` to false if the aggregator only needs the list of rankings as information to output a final aggregated ranking. In this case the algorithm should use the attribute `selector.rankings_to_aggregate` as input, which is a list where each element is a ranking following the same data structure as described [here](#ranking_format). The output should be a single ranking (same data structure), resulted from the aggregation of the received list of rankings. 
+
+In the `efs-assembler/efsassembler/aggregators/` path there's an example of an aggregator using the heavy aggregation (stb_weightened_layer1.py) and another aggregator that does not require the heavy aggregation process (borda.py).
+
+The `threshold_sensitive` variable is only used to indicate if the aggregation algorithm output changes depending on the selected threshold applied in the rankings. If it does, the algorithm can access this information through the attribute `selector.current_threshold`, which is an integer representing the cut-off point (in terms of index) to be applied in the rankings.
+
 
 ### <a name="rules-for-new-classifier-algorithms">Rules for new classifier algorithms</a>
+
+The script containing the new personalized classifier algorithm should implement a class called `Classifier` with three methods anologous to scikit-learn predictor objects:
+* `.fit(X, y)`: method for training the classifier
+* `.predict_proba(X)`: method for predicting the probabilities of each class for each sample data
+* `.predict(X)`: method for predicting the classes of each sample data
+
+For detailed information on the functionality of those methods, see [Developing scikit-learn estimators](#https://scikit-learn.org/stable/developers/develop.html), or directly a [classifier example](#https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html).
