@@ -20,13 +20,13 @@
     - [Rules for new feature selection algorithms](#rules-for-new-feature-selection-algorithms) 
     - [Rules for new aggregation algorithms](#rules-for-new-aggregation-algorithms) 
     - [Rules for new classifier algorithms](#rules-for-new-classifier-algorithms) 
-- [BibTeX entry](#bibtex) 
+- [BibTeX entry](#bibtex-entry) 
 
 ## Introduction
 
 The efs-assembler is a Python package integrated with R for performing ensemble feature selection experiments in binary classification problems. It is high flexible and allows the user to add different algorithms of feature selection (including support for R language), aggregation and also classification, offering options to perform stratified cross validation with downsampling and collect various performance metrics.
 
-The package is backed by a scientific study about ensemble feature selection for cancer biomarkers discovery in gene expression data. If you have scientific interests or want to use our package in formal reports, please cite us: [F. Colombelli, T. W. Kowalski, M. Recamonde-Mendoza, A hybrid en-semble feature selection design for candidate biomarkers discovery fromtranscriptome profiles, 2021.arXiv:2108.00290.](#bibtex)
+The package is backed by a scientific study about ensemble feature selection for cancer biomarkers discovery in gene expression data. If you have scientific interests or want to use our package in formal reports, please cite us: [F. Colombelli, T. W. Kowalski, M. Recamonde-Mendoza, A hybrid en-semble feature selection design for candidate biomarkers discovery fromtranscriptome profiles, 2021.arXiv:2108.00290.](#bibtex-entry)
 
 Currently, there are 4 types of experiments and because of the high flexibility, the input data structure requires special attention.
 
