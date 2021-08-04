@@ -55,7 +55,7 @@ For detailed information, check our article.
 
 ## Installation 
 
-Because of the package variety required by the provided feature selection algorithms, the installation steps still need to be further tested and investigated to make sure we cover more use cases and computer setups. Consider installing the current supported versions of Python (3.8) and R (4.0).
+Because of the package variety required by the provided feature selection algorithms, the installation steps still need to be further tested and investigated to make sure we cover more use cases and computer setups. Consider installing the current supported versions of Python (3.6) and R (4.0).
 
 Install FSelectorRcpp:
 
