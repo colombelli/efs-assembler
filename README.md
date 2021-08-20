@@ -21,6 +21,7 @@
     - [Rules for new aggregation algorithms](#rules-for-new-aggregation-algorithms) 
     - [Rules for new classifier algorithms](#rules-for-new-classifier-algorithms) 
 - [BibTeX entry](#bibtex-entry) 
+- [Acknowledgement](#acknowledgement)
 
 ## Introduction
 
@@ -349,3 +350,7 @@ For detailed information on the functionality of those methods, see [Developing 
       primaryClass={cs.LG}
 }
 ```
+
+## Acknowledgement
+
+This study was financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior - Brasil (CAPES) - Finance Code 001, Conselho Nacional de Desenvolvimento Científico e Tecnológico (project CNPq/AWS 032/2019, process no. 440005/2020-5), and Fundação de Amparo à Pesquisa do Estado do Rio Grande do Sul (FAPERGS).
