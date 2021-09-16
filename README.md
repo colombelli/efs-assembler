@@ -29,6 +29,8 @@ The efs-assembler is a Python package integrated with R for performing ensemble 
 
 The package is backed by a scientific study about ensemble feature selection for cancer biomarkers discovery in gene expression data. If you have scientific interests or want to use our package in formal reports, we kindly ask you to cite us in your publication: [F. Colombelli, T. W. Kowalski, M. Recamonde-Mendoza, A hybrid ensemble feature selection design for candidate biomarkers discovery from transcriptome profiles, 2021.arXiv:2108.00290.](#bibtex-entry)
 
+This work was developed at the Institute of Informatics, Universidade Federal do Rio Grande do Sul and Bioinformatics Core, Hospital de Clínicas de Porto Alegre.
+
 Currently, there are 4 types of experiments and because of the high flexibility, the input data structure requires special attention.
 
 #### Feature Selection algorithms
