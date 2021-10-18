@@ -6,7 +6,7 @@
 ## Summary
 
 - [Introduction](#introduction)
-    - [Feature Selection algorithms](#feature-selection-algorithms)
+    - [Feature selection algorithms](#feature-selection-algorithms)
     - [Aggregation algorithms](#aggregation-algorithms)
     - [Classification algorithms](#classification-algorithms)
     - [Collected metrics](#collected-metrics)
@@ -20,12 +20,16 @@
     - [Rules for new feature selection algorithms](#rules-for-new-feature-selection-algorithms) 
     - [Rules for new aggregation algorithms](#rules-for-new-aggregation-algorithms) 
     - [Rules for new classifier algorithms](#rules-for-new-classifier-algorithms) 
+- [BibTeX entry](#bibtex-entry) 
+- [Acknowledgement](#acknowledgement)
 
 ## Introduction
 
 The efs-assembler is a Python package integrated with R for performing ensemble feature selection experiments in binary classification problems. It is high flexible and allows the user to add different algorithms of feature selection (including support for R language), aggregation and also classification, offering options to perform stratified cross validation with downsampling and collect various performance metrics.
 
-The package is backed by a scientific study about ensemble feature selection for cancer biomarkers discovery in gene expression data. If you have scientific interests or want to use our package in formal reports, please cite us with: xxxx
+The package is backed by a scientific study about ensemble feature selection for cancer biomarkers discovery in gene expression data. If you have scientific interests or want to use our package in formal reports, we kindly ask you to cite us in your publication: [F. Colombelli, T. W. Kowalski, M. Recamonde-Mendoza, A hybrid ensemble feature selection design for candidate biomarkers discovery from transcriptome profiles, 2021.arXiv:2108.00290.](#bibtex-entry)
+
+This work was developed at the Institute of Informatics, Universidade Federal do Rio Grande do Sul and Bioinformatics Core, Hospital de Clínicas de Porto Alegre.
 
 Currently, there are 4 types of experiments and because of the high flexibility, the input data structure requires special attention.
 
@@ -54,7 +58,7 @@ For detailed information, check our article.
 
 ## Installation 
 
-Because of the package variety required by the provided feature selection algorithms, the installation steps still need to be further tested and investigated to make sure we cover more use cases and computer setups. Consider installing the current supported versions of Python (3.8) and R (4.0).
+Because of the package variety required by the provided feature selection algorithms, the installation steps still need to be further tested and investigated to make sure we cover more use cases and computer setups. Consider installing the current supported versions of Python (3.6) and R (4.0).
 
 Install FSelectorRcpp:
 
@@ -333,3 +337,22 @@ The script containing the new personalized classifier algorithm should implement
 * `.predict(X)`: method for predicting the classes of each sample data
 
 For detailed information on the functionality of those methods, see [Developing scikit-learn estimators](#https://scikit-learn.org/stable/developers/develop.html), or directly a [classifier example](#https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html).
+
+
+
+## BibTeX entry
+
+```
+@misc{colombelli2021hybrid,
+      title={A Hybrid Ensemble Feature Selection Design for Candidate Biomarkers Discovery from Transcriptome Profiles}, 
+      author={Felipe Colombelli and Thayne Woycinck Kowalski and Mariana Recamonde-Mendoza},
+      year={2021},
+      eprint={2108.00290},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+
+## Acknowledgement
+
+This project was financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior - Brasil (CAPES) - Finance Code 001, Conselho Nacional de Desenvolvimento Científico e Tecnológico (project CNPq/AWS 032/2019, process no. 440005/2020-5), and Fundação de Amparo à Pesquisa do Estado do Rio Grande do Sul (FAPERGS).
