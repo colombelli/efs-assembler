@@ -14,14 +14,13 @@ from efsassembler.Constants import AGGREGATED_RANK_FILE_NAME, SINGLE_RANK_FILE_N
 
 class Evaluator:
 
-    # th_in_fraction: bool  => if the threshold values are fractions or integers
-    def __init__(self, data_manager:DataManager, thresholds, classifier_file:str, th_in_fraction=False):
+    def __init__(self, data_manager:DataManager, thresholds, classifier_file:str):
 
         self.dm = data_manager
         
         self.thresholds = None
         self.frac_thresholds = None
-        self.__init_thresholds(thresholds, th_in_fraction)
+        self.__init_thresholds(thresholds)
         
         self.final_ranks = None     # If the ranks are threshold sensitive, than they will be loaded
                                     # at each iteration to save memory
@@ -44,23 +43,30 @@ class Evaluator:
         
 
     
-    def __init_thresholds(self, thresholds, th_in_fraction):
-        if th_in_fraction:
+    def __init_thresholds(self, thresholds):
+
+        if not all(isinstance(e, (int, float)) for e in thresholds):
+            raise(Exception('List of thresholds should have only numbers.'))
+
+        if all(isinstance(e, (float)) for e in thresholds):
             self.thresholds, self.frac_thresholds = self.get_int_thresholds(thresholds)
-        else:
+        elif all(isinstance(e, (int)) for e in thresholds):
             self.thresholds, self.frac_thresholds = self.get_frac_thresholds(thresholds)
+        else:
+            raise(Exception('List of thresholds should have only integers (cut-off points)'\
+                +' or floats (percentages of features to keep), but not a combination of both!'))
         return
 
 
     def get_int_thresholds(self, thresholds):
 
-        dataset_len = len(self.dm.pd_df.columns)
+        num_features = len(self.dm.pd_df.columns)
 
         updated_fraction_thresholds = []
         int_thresholds = []
         for th in thresholds:
 
-            int_th = int(dataset_len * th/100)
+            int_th = int(num_features * th)
             if not(int_th):
                 Logger.zero_int_threshold(th)
                 continue
