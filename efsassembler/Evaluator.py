@@ -163,7 +163,10 @@ class Evaluator:
 
 
     def __get_x(self, df, features):
-        return df.loc[:, features]
+        try:
+            return df.loc[:, features]
+        except:  # The features are possibly saved as numbers, while the columns of the df are strings of these numbers
+            return df.loc[:, map(str, features)]
     
     def __get_y(self, df):
         return df.loc[:, ['class']].T.values[0]
