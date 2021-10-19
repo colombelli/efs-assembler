@@ -24,6 +24,8 @@ class FSTechnique:
                     aggregator=None, fst_aggregator=None, snd_aggregator=None):
         self.dm = data_manager
         self.thresholds = thresholds
+        #self.__init_thresholds(thresholds)
+
         self.fr_methods = FeatureRanker.generate_ranker_object(fr_methods)
         self.fr_method = self.fr_methods[0]  # For techniques that use only one Feature Ranker 
 
@@ -40,6 +42,7 @@ class FSTechnique:
 
         self.final_rankings_dict = {}
         self.__init_final_rankings_dict()
+
 
 
     def _set_rankings_to_aggregate(self, rankings):

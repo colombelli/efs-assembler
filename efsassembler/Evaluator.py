@@ -20,6 +20,7 @@ class Evaluator:
         
         self.thresholds = None
         self.frac_thresholds = None
+        self.are_thresholds_fractions = False
         self.__init_thresholds(thresholds)
         
         self.final_ranks = None     # If the ranks are threshold sensitive, than they will be loaded
@@ -49,6 +50,7 @@ class Evaluator:
             raise(Exception('List of thresholds should have only numbers.'))
 
         if all(isinstance(e, (float)) for e in thresholds):
+            self.are_thresholds_fractions = True
             self.thresholds, self.frac_thresholds = self.get_int_thresholds(thresholds)
         elif all(isinstance(e, (int)) for e in thresholds):
             self.thresholds, self.frac_thresholds = self.get_frac_thresholds(thresholds)
@@ -124,8 +126,13 @@ class Evaluator:
 
     def __infer_if_agg_th_sensible(self):
 
-        file_name = Path(self.dm.results_path + "fold_1/" + \
+        if self.are_thresholds_fractions:
+            file_name = Path(self.dm.results_path + "fold_1/" + \
+                        AGGREGATED_RANK_FILE_NAME + str(self.frac_thresholds[0]) + ".csv")
+        else:
+            file_name = Path(self.dm.results_path + "fold_1/" + \
                         AGGREGATED_RANK_FILE_NAME + str(self.thresholds[0]) + ".csv")
+
         if file_name.is_file():
             self.is_agg_th_sensible = True
         else:
@@ -233,7 +240,9 @@ class Evaluator:
     def __compute_stabilities(self, final_ranks_intermediate=None):
 
         th_stabilities = []
-        for th in self.thresholds:
+        thresholds = self.frac_thresholds if self.are_thresholds_fractions else self.thresholds
+
+        for th in thresholds:
             final_ranks = self.__get_final_ranks(th)
             self.rankings = self.__get_feature_lists(final_ranks)
             th_stabilities.append(self.get_stability(th))
@@ -264,6 +273,7 @@ class Evaluator:
             PRECISION_RECALL_AUC_METRIC: []
         }
 
+
         for i, (training, testing) in enumerate(folds_sampling):
 
             th_accuracies = []
@@ -271,9 +281,12 @@ class Evaluator:
             th_pr_aucs = []
             th_conf_matrices = {}
 
-            for th in self.thresholds:
+            for th, th_frac in zip(self.thresholds, self.frac_thresholds):
                 
-                final_ranks = self.__get_final_ranks(th)
+                if self.are_thresholds_fractions:
+                    final_ranks = self.__get_final_ranks(th_frac)
+                else:
+                    final_ranks = self.__get_final_ranks(th)
                 self.rankings = self.__get_feature_lists(final_ranks)
 
                 features = self.rankings[i][0:th]
