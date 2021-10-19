@@ -5,6 +5,7 @@
 
 """
 
+
 def get_consistency_index(A_subset: list, B_subset: list, n: int):
     # The sizes of both subsets must be equal and are hold by variable k
     # And the variable r represents the cardinality of (A ∩ B)
@@ -23,7 +24,7 @@ def get_consistency_index(A_subset: list, B_subset: list, n: int):
 # Or a the full ranks with a threshold value
 def get_kuncheva_index(subsets: list, n=None, threshold=None):
     # n represents the original set size
-    # threshold is an integer representing the number of elements considered
+    # threshold is an integer (or fraction, e.g., 0.3) representing the number of elements considered
     # the subsets will be selected respecting the closed interval [0, threshold]
     # If a threshold is needed, n isn't needed, otherwise it is
     
@@ -31,18 +32,24 @@ def get_kuncheva_index(subsets: list, n=None, threshold=None):
         if threshold is None:
             raise Exception('Provide a threshold value or the size of the original set.')
         else:
-            th = threshold
             n = len(subsets[0])
     
-    if th > n:
+
+    if threshold > n:
         raise Exception('Provided threshold greater than ranking length (' + str(n) + ')')
     
-    elif th == n:
+    elif threshold == n:
         return 1
 
     else:
         if threshold is not None:
-            th = threshold
+            if isinstance(threshold, (int)):
+                th = threshold
+            else:
+                th = int(n * threshold)
+                if not th:  # If the rounding to integer results in a 0 th, changes to 1
+                    th=1
+
         else:
             th = len(subsets[0])
 
