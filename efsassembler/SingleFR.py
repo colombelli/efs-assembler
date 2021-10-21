@@ -51,7 +51,7 @@ class SingleFR(FSTechnique):
         else:
             Logger.whole_dataset_selection()
             ranking = self.fr_method.select(self.dm.pd_df, save_ranking=False)
-            output_path = self.dm.results_path + SELECTION_PATH + str(i) + '/'
+            output_path = self.dm.results_path + SELECTION_PATH
             file_path = output_path + SINGLE_RANK_FILE_NAME
             self.dm.save_encoded_ranking(ranking, file_path)
              
