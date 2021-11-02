@@ -14,12 +14,13 @@ from sys import exit
 import pickle
 import urllib.parse
 from copy import deepcopy
+from distutils.dir_util import copy_tree
 
 
 class DataManager:
 
     def __init__(self, results_path, file_path, num_bootstraps, 
-                num_folds, undersampling=True, seed=0):
+                num_folds, undersampling=True, seed=0, base_experiment_path=None):
         
         self.seed = seed
         self.set_seed()
@@ -43,6 +44,7 @@ class DataManager:
 
         self.results_path = results_path
         self.folds_final_selection = None
+        self.base_experiment_path = base_experiment_path
 
 
     def set_seed(self):
@@ -99,15 +101,22 @@ class DataManager:
             #Throw error message
             exit()
         
-        mkdir(self.results_path+SELECTION_PATH)
+        if self.base_experiment_path:
+            # Log 'copying directory'
+            copy_tree(self.base_experiment_path, self.results_path)
 
-        for i in range(1, self.num_folds+1):
-            fold_dir = self.results_path+"/fold_"+str(i)
-            mkdir(fold_dir)
 
-            for j in range(1, self.num_bootstraps+1):
-                bs_dir = fold_dir + "/bootstrap_"+str(j)
-                mkdir(bs_dir)
+        else:
+            mkdir(self.results_path+SELECTION_PATH)
+
+            for i in range(1, self.num_folds+1):
+                fold_dir = self.results_path+"/fold_"+str(i)
+                mkdir(fold_dir)
+
+                for j in range(1, self.num_bootstraps+1):
+                    bs_dir = fold_dir + "/bootstrap_"+str(j)
+                    mkdir(bs_dir)
+        return
 
 
 
@@ -159,13 +168,20 @@ class DataManager:
 
     # Important note: The method only encodes columns (the features)
     @classmethod
-    def encode_df(self, df):
+    def encode_df(self, df, rows=False):
         
-        columns = []
-        for attribute in df.columns:
-            columns.append(self.alnum_encode(attribute))
+        if rows:
+            indexes = []
+            for ind in df.index:
+                indexes.append(self.alnum_encode(ind))
+            df.index = indexes
 
-        df.columns = columns
+        else:
+            columns = []
+            for attribute in df.columns:
+                columns.append(self.alnum_encode(attribute))
+
+            df.columns = columns
         return df
 
 
@@ -173,12 +189,6 @@ class DataManager:
     # it is basically used when decoding ranking-like dataframes (where features are indexes) 
     @classmethod
     def decode_df(self, df, rows:bool):
-
-        if not rows:
-            columns = []
-            for attribute in df.columns:
-                columns.append(self.alnum_decode(attribute))
-            df.columns = columns
         
         if rows:
             indexes = []
@@ -186,18 +196,30 @@ class DataManager:
                 indexes.append(self.alnum_decode(ind))
             df.index = indexes
 
+        else:
+            columns = []
+            for attribute in df.columns:
+                columns.append(self.alnum_decode(attribute))
+            df.columns = columns
+
         return df
 
 
     @classmethod
     def save_encoded_ranking(self, ranking, file_name_and_dir):
         encoded_ranking = deepcopy(ranking)
-        decoded_ranking = self.decode_df(encoded_ranking, True)
+        decoded_ranking = self.decode_df(encoded_ranking, rows=True)
 
         #r_decoded_ranking = self.pandas_to_r(decoded_ranking)
         #robjects.r["saveRDS"](r_decoded_ranking, file_name_and_dir)
         decoded_ranking.to_csv(file_name_and_dir+".csv")
         return
+
+
+    def load_decoded_rank(self, file_name_and_dir):
+        decoded_rank = pd.read_csv(file_name_and_dir, index_col=0)
+        encoded_rank = self.encode_df(decoded_rank, rows=True)
+        return encoded_rank
 
     
     def encode_main_dm_df(self):
@@ -212,10 +234,13 @@ class DataManager:
 
 
 
-    def init_data_folding_process(self):
+    def init_data_folding_process(self, experiment_recycle=True):
 
-        self.__calculate_folds()
-        self.__save_folds()
+        if experiment_recycle:
+            self.__load_folds()
+        else:
+            self.__calculate_folds()
+            self.__save_folds()
         return
 
 
@@ -234,16 +259,25 @@ class DataManager:
             pickle.dump(self.folds, f)
         return
 
+    
+    def __load_folds(self):
+        file = self.base_experiment_path + "fold_sampling.pkl"
+        with (open(file, "rb")) as f:
+            self.folds = pickle.load(f)
+        return
+
 
     def update_bootstraps(self):
-        self.current_bootstraps = self.__get_bootstraps()
-        self.__save_bootstraps()
+        if self.base_experiment_path:
+            self.current_bootstraps = self.__load_bootstraps()
+        else:
+            self.current_bootstraps = self.__get_bootstraps()
+            self.__save_bootstraps()
 
 
     # Output: A list of tuples containing n tuples representing the n 
     #           (bootstraps, out-of-bag) samples
     def __get_bootstraps(self):
-        
         training_data = self.folds[self.current_fold_iteration][0]
         num_bs_samples = len(training_data)
         
@@ -252,18 +286,27 @@ class DataManager:
             bootstrap = resample(training_data, replace=True, n_samples=num_bs_samples) #random_state is not being used since seed is being set globally
             oob = np.array([x for x in training_data if x not in bootstrap])
             bootstraps_oob.append((bootstrap, oob))
-
         return bootstraps_oob
 
 
     def __save_bootstraps(self):
-
         path = self.results_path + "fold_" + str(self.current_fold_iteration+1) + "/bootstrap_"
         for i, bootstrap in enumerate(self.current_bootstraps):
             file = path + str(i+1) + "/bootstrap_sampling.pkl" 
             with open(file, 'wb') as f:
                 pickle.dump(bootstrap, f)
         return
+
+
+    def __load_bootstraps(self):
+        bootstraps_oob = []
+        path = self.results_path + "fold_" + str(self.current_fold_iteration+1) + "/bootstrap_"
+        for i in range(1,self.num_bootstraps+1):
+            file = path + str(i+1) + "/bootstrap_sampling.pkl" 
+            with open(file, 'rb') as f:
+                bootstraps_oob.append(pickle.load(f))
+        return bootstraps_oob
+
 
     
     def update_bootstraps_outside_cross_validation(self, df, pkl_path):

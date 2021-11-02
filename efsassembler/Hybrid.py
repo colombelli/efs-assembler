@@ -10,16 +10,23 @@ class Hybrid(FSTechnique):
     # fr_methods: a tuple (script name, language which the script was written, .rds output name)
     # thresholds: must be list with integer values
     def __init__(self, data_manager:DataManager, fr_methods:list, 
-    first_aggregator, second_aggregator, thresholds:list):
+    first_aggregator, second_aggregator, thresholds:list, experiment_recycle=False):
 
         super().__init__(data_manager, fr_methods, thresholds, 
                             fst_aggregator=first_aggregator, 
-                            snd_aggregator=second_aggregator)
+                            snd_aggregator=second_aggregator,
+                            experiment_recycle=experiment_recycle)
 
         if self.fst_aggregator.heavy or self.snd_aggregator.heavy:
-            self.hyb_feature_selection = self.hyb_feature_selection_heavy
+            if self.experiment_recycle:
+                self.hyb_feature_selection = self.hyb_feature_selection_light_recycle_exp
+            else:
+                self.hyb_feature_selection = self.hyb_feature_selection_heavy
         else:
-            self.hyb_feature_selection = self.hyb_feature_selection_light
+            if self.experiment_recycle:
+                self.hyb_feature_selection = self.hyb_feature_selection_heavy_recycle_exp
+            else:
+                self.hyb_feature_selection = self.hyb_feature_selection_light
 
 
         
@@ -121,6 +128,37 @@ class Hybrid(FSTechnique):
                 self.final_rankings_dict[0].append(fs_aggregation)
         
         return
+
+
+
+    def hyb_feature_selection_light_recycle_exp(self, in_experiment=True):
+        
+        rank_path = None
+        i = self.dm.current_fold_iteration
+        snd_layer_rankings = {0: []}
+        for th in self.thresholds:
+            snd_layer_rankings[th] = []
+
+        for j, (_, _) in enumerate(self.dm.current_bootstraps):
+
+            if in_experiment:
+                Logger.bootstrap_fold_iteration(j+1, i+1)
+                rank_path = self.dm.get_output_path(i, j)
+
+            else:
+                Logger.bootstrap_iteration(j+1)
+
+            fst_layer_rankings = []
+            for fr_method in self.fr_methods:
+                fst_layer_rankings.append(
+                    self.dm.load_decoded_rank(rank_path+fr_method.ranking_name)
+                )
+            
+            self._set_rankings_to_aggregate(fst_layer_rankings)
+            self.__aggregate_light_fst_layer(j, snd_layer_rankings, in_experiment)
+        
+        self.__aggregate_light_snd_layer(snd_layer_rankings, in_experiment)
+        return 
 
 
 #################################################################################################################################
@@ -243,12 +281,41 @@ class Hybrid(FSTechnique):
         return fs_aggregations
 
 
+
+    def hyb_feature_selection_heavy_recycle_exp(self, in_experiment=True):
+
+        rank_path = None
+        bs_rankings = {}
+        i = self.dm.current_fold_iteration
+
+        for j, (_, _) in enumerate(self.dm.current_bootstraps):
+            
+            if in_experiment:
+                Logger.bootstrap_fold_iteration(j+1, i+1)
+                rank_path = self.dm.get_output_path(i, j)
+
+            else: 
+                Logger.bootstrap_iteration(j+1)
+
+            fst_layer_rankings = []
+            for fr_method in self.fr_methods: 
+                fst_layer_rankings.append(
+                    self.dm.load_decoded_rank(rank_path+fr_method.ranking_name)
+                )
+            
+            bs_rankings[j] = fst_layer_rankings
+        self.dm.set_bs_rankings(bs_rankings)
+
+        self.__aggregate_heavy(in_experiment) 
+        return
+
+
 #################################################################################################################################
 #################################################################################################################################
 #################################################################################################################################
 
 
-    def select_features(self, balanced=True):
+    def select_features(self, balanced=True, experiment_recycle=False):
 
         if balanced:
             total_folds = len(self.dm.folds_final_selection)

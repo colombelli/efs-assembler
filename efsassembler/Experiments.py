@@ -28,7 +28,7 @@ class Experiments:
             "bootstraps": <int number of bags for bootstrapping data if it's a Hybrid/Homogeneous ensemble>,
             "aggregators": [<aggregator1 object>, <aggregator2 object>],
             "rankers": [<ranker1 object>, <ranker2 object>, ..., <rankern object>],
-            "classifier": "classifier_model_file_name",   --> see ./classifiers/ folder. currently available: "gbc" and "svm"
+            "classifier": "classifier_model_file_name",   --> see ./classifiers/ folder. currently available: "gbc", "svm" and "random_forest"
             "datasets": [<path to dataset1>, <path to dataset2>, ..., <path to dataset n>],
             "balanced_final_selection": <bool indicating if final feature selection is to be applied in balanced folds> 
         }

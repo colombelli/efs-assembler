@@ -21,7 +21,7 @@ class FSTechnique:
     '''
 
     def __init__(self, data_manager:DataManager, fr_methods:list, thresholds:list,
-                    aggregator=None, fst_aggregator=None, snd_aggregator=None):
+                    aggregator=None, fst_aggregator=None, snd_aggregator=None, experiment_recycle=False):
         self.dm = data_manager
         self.thresholds = thresholds
         #self.__init_thresholds(thresholds)
@@ -42,6 +42,8 @@ class FSTechnique:
 
         self.final_rankings_dict = {}
         self.__init_final_rankings_dict()
+
+        self.experiment_recycle=experiment_recycle
 
 
 
