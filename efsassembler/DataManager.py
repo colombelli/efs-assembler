@@ -301,7 +301,7 @@ class DataManager:
     def __load_bootstraps(self):
         bootstraps_oob = []
         path = self.results_path + "fold_" + str(self.current_fold_iteration+1) + "/bootstrap_"
-        for i in range(1,self.num_bootstraps+1):
+        for i in range(self.num_bootstraps):
             file = path + str(i+1) + "/bootstrap_sampling.pkl" 
             with open(file, 'rb') as f:
                 bootstraps_oob.append(pickle.load(f))

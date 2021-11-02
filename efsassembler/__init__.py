@@ -2,6 +2,7 @@ from .Aggregator import Aggregator
 from .DataManager import DataManager
 from .Evaluator import Evaluator
 from .Experiments import Experiments
+from .ExperimentRecycle import ExperimentRecyle
 from .InformationManager import InformationManager
 from .FeatureRanker import FeatureRanker
 from .Hybrid import Hybrid

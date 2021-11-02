@@ -52,6 +52,11 @@ class Logger:
         return
 
     @classmethod
+    def load_ranked_features_with_script(self, script_string):
+        Logger.handler.info("Loading ranked features from " + script_string)
+        return
+
+    @classmethod
     def fold_iteration(self, fold_iteration):
         Logger.handler.info("Starting fold iteration " + str(fold_iteration))
         return

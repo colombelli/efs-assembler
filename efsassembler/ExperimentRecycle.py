@@ -155,7 +155,7 @@ class ExperimentRecyle:
 
         ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers, str_aggregators)
-        ensemble = Hybrid(dm, rankers, aggregator1, aggregator2, ths)
+        ensemble = Hybrid(dm, rankers, aggregator1, aggregator2, ths, experiment_recycle=True)
 
         st = time()
         ensemble.select_features_experiment()

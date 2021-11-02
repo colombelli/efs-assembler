@@ -19,12 +19,12 @@ class Hybrid(FSTechnique):
 
         if self.fst_aggregator.heavy or self.snd_aggregator.heavy:
             if self.experiment_recycle:
-                self.hyb_feature_selection = self.hyb_feature_selection_light_recycle_exp
+                self.hyb_feature_selection = self.hyb_feature_selection_heavy_recycle_exp
             else:
                 self.hyb_feature_selection = self.hyb_feature_selection_heavy
         else:
             if self.experiment_recycle:
-                self.hyb_feature_selection = self.hyb_feature_selection_heavy_recycle_exp
+                self.hyb_feature_selection = self.hyb_feature_selection_light_recycle_exp
             else:
                 self.hyb_feature_selection = self.hyb_feature_selection_light
 
@@ -150,8 +150,9 @@ class Hybrid(FSTechnique):
 
             fst_layer_rankings = []
             for fr_method in self.fr_methods:
+                Logger.load_ranked_features_with_script(fr_method.script_name)
                 fst_layer_rankings.append(
-                    self.dm.load_decoded_rank(rank_path+fr_method.ranking_name)
+                    self.dm.load_decoded_rank(rank_path+fr_method.ranking_name+".csv")
                 )
             
             self._set_rankings_to_aggregate(fst_layer_rankings)
@@ -299,11 +300,13 @@ class Hybrid(FSTechnique):
 
             fst_layer_rankings = []
             for fr_method in self.fr_methods: 
+                Logger.load_ranked_features_with_script(fr_method.script_name)
                 fst_layer_rankings.append(
-                    self.dm.load_decoded_rank(rank_path+fr_method.ranking_name)
+                    self.dm.load_decoded_rank(rank_path+fr_method.ranking_name+".csv")
                 )
             
             bs_rankings[j] = fst_layer_rankings
+            
         self.dm.set_bs_rankings(bs_rankings)
 
         self.__aggregate_heavy(in_experiment) 
