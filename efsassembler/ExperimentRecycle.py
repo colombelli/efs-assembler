@@ -52,7 +52,8 @@ class ExperimentRecyle:
 
         
         self.exp = experiment
-
+        self.dm = None  # temporary
+        
         if results_path[-1] != "/":
             self.results_path = results_path + "/"
         else:
@@ -148,6 +149,7 @@ class ExperimentRecyle:
 
         dm = DataManager(results_path, dataset_path, num_bootstraps, self.num_folds, 
                         undersampling=True, seed=seed, base_experiment_path=self.base_experiment_path)
+        self.dm = dm  # temporary
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
@@ -181,6 +183,42 @@ class ExperimentRecyle:
 
     def perform_selection_het(self, dataset_path, results_path, rankers, aggregator, 
                                     seed, ths, classifier_file):
+
+        str_aggregators = [aggregator]
+        str_rankers = [i[0] for i in rankers]
+        num_bootstraps = 0
+
+        dm = DataManager(results_path, dataset_path, num_bootstraps, self.num_folds, 
+                        undersampling=True, seed=seed, base_experiment_path=self.base_experiment_path)
+        self.dm = dm  # temporary
+        Logger.encoding_dataset()
+        dm.encode_main_dm_df()
+        dm.create_results_dir()
+        dm.init_data_folding_process()
+        
+        ev = Evaluator(dm, ths, classifier_file)
+        im = InformationManager(dm, ev, str_rankers, str_aggregators)
+        ensemble = Heterogeneous(dm, rankers, aggregator, ths, experiment_recycle=True)
+
+        st = time()
+        ensemble.select_features_experiment()
+        self.compute_time_taken(st)
+
+        Logger.decoding_dataframe()
+        dm.decode_main_dm_df()
+
+        Logger.starting_evaluation_process()
+        ev.evaluate_final_ranks()
+
+        Logger.creating_csv_files()
+        im.create_csv_tables()
+
+        # TO-DO: 
+        #final_selection = FinalSelection(ensemble, balanced_final_selection)
+        #final_selection.start()
+
+        Logger.end_experiment_message()
+
         return
 
     

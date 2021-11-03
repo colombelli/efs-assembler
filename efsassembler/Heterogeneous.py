@@ -9,17 +9,24 @@ class Heterogeneous(FSTechnique):
 
     # fr_methods: a list whose elements are tuples with the following format: 
     # (script name, language which the script was written, .csv output name)
-    def __init__(self, data_manager:DataManager, fr_methods:list, aggregator, thresholds:list):
-        super().__init__(data_manager, fr_methods, thresholds, aggregator=aggregator)
+    def __init__(self, data_manager:DataManager, fr_methods:list, aggregator, 
+                thresholds:list, experiment_recycle=False):
+        super().__init__(data_manager, fr_methods, thresholds, aggregator=aggregator, 
+                        experiment_recycle=experiment_recycle)
         
 
     def het_feature_selection(self, df, output_path, in_experiment=True):
         
         rankings = []
-        for fr_method in self.fr_methods:  
-            rankings.append(
-                fr_method.select(df, output_path, save_ranking=in_experiment)
-            )
+        for fr_method in self.fr_methods:
+            if self.experiment_recycle:
+                rankings.append(
+                    self.dm.load_decoded_rank(output_path+fr_method.ranking_name+".csv")
+                )
+            else:  
+                rankings.append(
+                    fr_method.select(df, output_path, save_ranking=in_experiment)
+                )
         
         self._set_rankings_to_aggregate(rankings)
 
