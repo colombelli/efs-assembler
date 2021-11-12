@@ -153,7 +153,7 @@ class ExperimentRecyle:
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
-        dm.init_data_folding_process()
+        dm.init_data_folding_process(experiment_recycle=True)
 
         ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers, str_aggregators)
@@ -194,7 +194,7 @@ class ExperimentRecyle:
         Logger.encoding_dataset()
         dm.encode_main_dm_df()
         dm.create_results_dir()
-        dm.init_data_folding_process()
+        dm.init_data_folding_process(experiment_recycle=True)
         
         ev = Evaluator(dm, ths, classifier_file)
         im = InformationManager(dm, ev, str_rankers, str_aggregators)

@@ -234,7 +234,7 @@ class DataManager:
 
 
 
-    def init_data_folding_process(self, experiment_recycle=True):
+    def init_data_folding_process(self, experiment_recycle=False):
 
         if experiment_recycle:
             self.__load_folds()
