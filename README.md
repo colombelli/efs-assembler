@@ -102,7 +102,7 @@ The expected type of input for the ```experiments_list``` object is a list of di
 * ```"rankers"```: a list with the feature selection algorithms to be used (even in "sin" and "hom" experiments a list is expected). The feature selection algorithms are represented by a tuple in the format ("file_name", "language", "rank_file_name_to_use_for_saving_their_result"), e.g., ```[("reliefF", "python", "rf"), ("geoDE", "python", "gd"), ("gain-ratio", "r", "gr"), ("symmetrical-uncertainty", "r", "su"), ("wx", "python", "wx")]```. Those are the current available algorithms. If more than one is given for a "sin" or "hom" experiment, the first algorithm will be used.
 
 For **"hyb"**, **"het"** and **"hom"** experiments:
-* ```"aggregators"```: a list with the aggregator algorithms to be used. Since only python algorithms are supported, only the file name of the algorithm is required, e.g., ```["stb_weightened_layer1", "borda"]```. If it is a "het" or "hom" experiment only the first aggregator will be considered and only "borda" is currently available for aggregating them. If more than one is given for a "het" or "hom" experiment, the first algorithm will be used.
+* ```"aggregators"```: a list with the aggregator algorithms to be used. Since only python algorithms are supported, only the file name of the algorithm is required, e.g., ```["stb_weightened_layer1", "borda"]```. If it is a "het" or "hom" experiment only the first aggregator will be considered and only "borda" is currently available for aggregating them.
 
 For **"hyb"** and **"hom"** experiments:
 * ```"bootstraps"```: an integer representing the number of bootstraps to be sampled, e.g., ```50```
