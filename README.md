@@ -118,7 +118,7 @@ experiments_list = [
         "folds": 10,
         "undersampling": False,
         "balanced_final_selection": False,
-        "classifier": "gbm",
+        "classifier": "gbc",
         "datasets": ["my/dataset/one.csv", "my/dataset/two.csv"],
         "rankers": [("reliefF", "python", "rf"), ("geoDE", "python", "gd"), ("gain-ratio", "r", "gr")],
         "aggregators": ["stb_weightened_layer1", "borda"],
@@ -143,7 +143,7 @@ experiments_list = [
         "folds": 10,
         "undersampling": False,
         "balanced_final_selection": True,
-        "classifier": "gbm",
+        "classifier": "gbc",
         "datasets": ["my/dataset/one.csv"],
         "rankers": [("gain-ratio", "r", "gr")],
         "aggregators": ["borda"],
@@ -156,7 +156,7 @@ experiments_list = [
         "folds": 10,
         "undersampling": True,
         "balanced_final_selection": False,
-        "classifier": "gbm",
+        "classifier": "gbc",
         "datasets": ["my/dataset/one.csv"],
         "rankers": [("reliefF", "python", "rf")]
     }
