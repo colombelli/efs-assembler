@@ -343,13 +343,16 @@ For detailed information on the functionality of those methods, see [Developing 
 ## BibTeX entry
 
 ```
-@misc{colombelli2021hybrid,
-      title={A Hybrid Ensemble Feature Selection Design for Candidate Biomarkers Discovery from Transcriptome Profiles}, 
-      author={Felipe Colombelli and Thayne Woycinck Kowalski and Mariana Recamonde-Mendoza},
-      year={2021},
-      eprint={2108.00290},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@article{colombelli2022hybrid,
+title = {A hybrid ensemble feature selection design for candidate biomarkers discovery from transcriptome profiles},
+journal = {Knowledge-Based Systems},
+pages = {109655},
+year = {2022},
+issn = {0950-7051},
+doi = {https://doi.org/10.1016/j.knosys.2022.109655},
+url = {https://www.sciencedirect.com/science/article/pii/S0950705122008383},
+author = {Felipe Colombelli and Thayne Woycinck Kowalski and Mariana Recamonde-Mendoza},
+keywords = {Feature selection, Ensemble learning, Biomarkers discovery, Microarray, Bioinformatics, High-dimensional data}
 }
 ```
 
